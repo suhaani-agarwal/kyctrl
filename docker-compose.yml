@@ -1,0 +1,9 @@
+services:
+  kyctrl:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./audit.sqlite3:/app/audit.sqlite3

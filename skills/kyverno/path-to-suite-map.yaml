@@ -1,0 +1,85 @@
+# Phase 0 deliverable: source path → test suite mapping.
+#
+# Consumed by the (stretch-goal) Phase 2 diff-to-test mapper and by the
+# issue-triage/dependabot skill docs when they need to point at "what
+# covers this." Grounded in the real `pkg/` and `test/conformance/chainsaw/`
+# layout of kyverno/kyverno as of this writing — extend this file, don't
+# hardcode paths in code, when the repo's structure changes.
+#
+# Each entry:
+#   path: a glob matched against changed files in a diff
+#   unit_test_packages: `go test` package paths to run
+#   conformance_suites: chainsaw suite directories under
+#     test/conformance/chainsaw/ that exercise this path
+
+- path: "pkg/engine/validate/**"
+  unit_test_packages: ["./pkg/engine/...", "./pkg/validation/..."]
+  conformance_suites: ["validate", "validating-policies", "policy-validation"]
+
+- path: "pkg/engine/mutate/**"
+  unit_test_packages: ["./pkg/engine/..."]
+  conformance_suites: ["mutate", "mutating-policies", "mutating-admission-policy-reports"]
+
+- path: "pkg/engine/generation.go"
+  unit_test_packages: ["./pkg/engine/...", "./pkg/background/..."]
+  conformance_suites: ["generate", "generating-policies", "namespaced-generating-policies"]
+
+- path: "pkg/engine/image_verify*.go"
+  unit_test_packages: ["./pkg/engine/...", "./pkg/imageverification/..."]
+  conformance_suites: ["verify-images", "verify-manifests", "image-validating-policies", "namespaced-image-validating-policies"]
+
+- path: "pkg/cel/**"
+  unit_test_packages: ["./pkg/cel/..."]
+  conformance_suites: ["cel", "validating-admission-policy-reports", "generate-validating-admission-policy"]
+
+- path: "pkg/webhooks/**"
+  unit_test_packages: ["./pkg/webhooks/..."]
+  conformance_suites: ["webhooks", "webhook-configurations"]
+
+- path: "pkg/controllers/**"
+  unit_test_packages: ["./pkg/controllers/..."]
+  conformance_suites: ["reports", "lease", "ttl"]
+
+- path: "pkg/controllers/cleanup/**"
+  unit_test_packages: ["./pkg/controllers/cleanup/..."]
+  conformance_suites: ["deleting-policies", "namespaced-deleting-policies", "cleanup"]
+
+- path: "pkg/globalcontext/**"
+  unit_test_packages: ["./pkg/globalcontext/..."]
+  conformance_suites: ["globalcontext"]
+
+- path: "pkg/exceptions/**"
+  unit_test_packages: ["./pkg/exceptions/..."]
+  conformance_suites: ["exceptions", "policy-exceptions-disabled"]
+
+- path: "pkg/autogen/**"
+  unit_test_packages: ["./pkg/autogen/..."]
+  conformance_suites: ["autogen"]
+
+- path: "pkg/openreports/**"
+  unit_test_packages: ["./pkg/openreports/..."]
+  conformance_suites: ["openreports", "reports"]
+
+- path: "pkg/cosign/**"
+  unit_test_packages: ["./pkg/cosign/..."]
+  conformance_suites: ["custom-sigstore", "sigstore-custom-tuf"]
+
+- path: "pkg/notary/**"
+  unit_test_packages: ["./pkg/notary/..."]
+  conformance_suites: ["verify-images"]
+
+- path: "cmd/cli/**"
+  unit_test_packages: ["./cmd/cli/..."]
+  conformance_suites: ["cli"]
+
+- path: "cmd/background-controller/**"
+  unit_test_packages: ["./cmd/background-controller/..."]
+  conformance_suites: ["background-only", "generate"]
+
+- path: "api/**"
+  unit_test_packages: ["./api/..."]
+  conformance_suites: []  # codegen gate applies instead — see safe-boundaries.md
+
+- path: "charts/**"
+  unit_test_packages: []
+  conformance_suites: []  # `make helm-test`, not chainsaw

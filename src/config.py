@@ -1,0 +1,97 @@
+"""Type-safe loading of `.github/ai-maintainer.yaml`.
+
+This is the single source of truth for agent behavior (see §5.4 of
+kyctrl_plan.md). Every agent run starts by calling `load_config()` and
+`kill_switch_engaged()` — a misconfigured file fails loudly here instead of
+causing silent misbehavior three layers down.
+
+Two independent kill switches are modeled on purpose:
+  1. `AiMaintainerConfig.enabled` — reviewed, comes from a committed file.
+  2. The `AI_MAINTAINER_ENABLED` GitHub repo variable — instant, no PR
+     needed. It always wins if the two disagree (see `kill_switch_engaged`).
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Callable
+
+import yaml
+from loguru import logger
+from pydantic import BaseModel, Field, field_validator
+
+
+class DependabotPolicy(BaseModel):
+    auto_merge: str = Field(default="patch_and_minor")
+    bot_usernames: list[str] = Field(default_factory=lambda: ["dependabot[bot]", "renovate[bot]"])
+    excluded_packages: list[str] = Field(default_factory=list)
+    min_pr_age_minutes: int = 5
+    hold_label: str = "hold"
+    needs_review_label: str = "needs-human-review"
+    required_checks: list[str] = Field(default_factory=list)
+
+    @field_validator("auto_merge")
+    @classmethod
+    def _valid_auto_merge(cls, v: str) -> str:
+        allowed = {"patch_and_minor", "patch_only", "none"}
+        if v not in allowed:
+            raise ValueError(f"dependabot.auto_merge must be one of {allowed}, got {v!r}")
+        return v
+
+
+class IssueTriagePolicy(BaseModel):
+    labels: dict[str, str] = Field(default_factory=dict)
+    required_bug_fields: list[str] = Field(default_factory=list)
+    webhook_only_fields: list[str] = Field(default_factory=list)
+    exclusion_labels: list[str] = Field(default_factory=list)
+
+
+class SafeBoundaries(BaseModel):
+    restricted_paths: list[str] = Field(default_factory=list)
+    autonomous_paths: list[str] = Field(default_factory=list)
+
+
+class AiMaintainerConfig(BaseModel):
+    enabled: bool = True
+    workflows: dict[str, bool] = Field(default_factory=dict)
+    rate_limits: dict[str, int] = Field(default_factory=dict)
+    dependabot: DependabotPolicy = Field(default_factory=DependabotPolicy)
+    issue_triage: IssueTriagePolicy = Field(default_factory=IssueTriagePolicy)
+    safe_boundaries: SafeBoundaries = Field(default_factory=SafeBoundaries)
+
+    def workflow_enabled(self, name: str) -> bool:
+        """A workflow only runs if both the global switch and its own switch are on."""
+        return self.enabled and self.workflows.get(name, False)
+
+
+def load_config(path: str | Path = ".github/ai-maintainer.yaml") -> AiMaintainerConfig:
+    """Load and validate the config file. Raises on malformed YAML/schema —
+    fail fast and loud rather than let an agent misbehave on bad config."""
+    path = Path(path)
+    if not path.exists():
+        logger.warning(f"No config file at {path}, falling back to safe defaults (all workflows off)")
+        return AiMaintainerConfig(workflows={})
+    raw = yaml.safe_load(path.read_text()) or {}
+    config = AiMaintainerConfig.model_validate(raw)
+    logger.info(f"Loaded config from {path}: enabled={config.enabled}, workflows={config.workflows}")
+    return config
+
+
+# `GetRepoVariable` lets callers inject however they fetch the live GitHub
+# Actions repo variable (real GitHub API call in production, a stub in
+# tests) without this module depending on `github_tools` directly.
+GetRepoVariable = Callable[[str], str | None]
+
+
+def kill_switch_engaged(config: AiMaintainerConfig, get_repo_variable: GetRepoVariable) -> bool:
+    """True if the agent must not act at all. Checks BOTH kill switches;
+    either one being "off" stops everything. The repo variable is the fast
+    path (no PR/redeploy needed) so it's checked first."""
+    live_value = get_repo_variable("AI_MAINTAINER_ENABLED")
+    if live_value is not None and live_value.strip().lower() == "false":
+        logger.warning("Kill switch engaged via AI_MAINTAINER_ENABLED repo variable — no action taken")
+        return True
+    if not config.enabled:
+        logger.warning("Kill switch engaged via .github/ai-maintainer.yaml `enabled: false` — no action taken")
+        return True
+    return False

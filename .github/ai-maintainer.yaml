@@ -1,0 +1,100 @@
+# kyctrl — AI Maintainer Assistant configuration
+#
+# This file is the single source of truth for the agent's behavior in this
+# repository. It is read remotely at the start of every run (never cached
+# across runs). Any maintainer can change it without touching agent code.
+#
+# Two independent kill switches exist on purpose:
+#   1. `enabled: false` below — a reviewed, auditable change (requires a PR).
+#   2. The `AI_MAINTAINER_ENABLED` repository Actions variable — instant,
+#      no PR needed, for "stop everything right now" emergencies. The repo
+#      variable always wins if the two disagree.
+
+enabled: true
+
+# Per-workflow kill switches. A workflow only runs if BOTH this is true
+# and the top-level `enabled` / repo variable are true.
+workflows:
+  dependabot_auto_merge: true
+  pr_hygiene: false        # stretch goal, off by default in the prototype
+  issue_triage: true
+  codegen_gate: false      # narrative-only in the prototype, not implemented yet
+
+# Rate limiting — max actions per hour, per workflow. Prevents runaway
+# behavior in all edge cases (e.g. a webhook replay storm).
+rate_limits:
+  dependabot_auto_merge: 10
+  issue_triage: 20
+
+dependabot:
+  # patch_and_minor | patch_only | none
+  auto_merge: patch_and_minor
+  # Only PRs opened by these bot accounts enter this workflow at all.
+  bot_usernames:
+    - "dependabot[bot]"
+    - "renovate[bot]"
+  # Packages that always require a human, regardless of semver bump —
+  # security-sensitive or historically fragile dependencies.
+  excluded_packages:
+    - github.com/sigstore/cosign
+    - github.com/sigstore/rekor
+    - github.com/notaryproject/notation-go
+    - k8s.io/client-go
+  # PR must be at least this old before auto-merge is eligible, so a
+  # just-opened PR can't be merged before CI has even had a chance to run.
+  min_pr_age_minutes: 5
+  # A human-applied label that blocks auto-merge no matter what the rule
+  # engine says.
+  hold_label: hold
+  # Label applied when the rule engine defers to a human.
+  needs_review_label: needs-human-review
+  # Required GitHub check names that must all be green before merging.
+  # Empty list = "all checks reported for the PR must be green".
+  required_checks: []
+
+issue_triage:
+  # Real Kyverno label taxonomy (see .github/labels.yml and
+  # .github/ISSUE_TEMPLATE/*.yaml in kyverno/kyverno — NOT invented for
+  # this prototype). Kyverno disables blank issues; every issue already
+  # arrives pre-labeled by its template ("bug"+"triage", "bug"+"type:cli"
+  # +"triage", or "enhancement"+"triage"). The agent's job is mostly to
+  # move the issue past `triage`, not to invent a label from nothing.
+  labels:
+    bug: bug
+    cli_bug: type:cli
+    feature: enhancement
+    security: security
+    triage: triage
+  # Real field ids from .github/ISSUE_TEMPLATE/bug-{other,cli,webhook}.yaml.
+  # Kyverno's bug templates do NOT have separate "policy YAML" / "resource
+  # YAML" fields — reporters paste manifests inline inside
+  # `bug-reproduce-steps`. So "missing info" is a content check on that
+  # field (does it contain a fenced YAML block with `apiVersion`/`kind`?),
+  # not a check for a field that doesn't exist. See
+  # skills/kyverno/issue-triage.md for the exact heuristic.
+  required_bug_fields:
+    - kyverno-version
+    - bug-description
+    - bug-reproduce-steps
+    - bug-expectations
+  # k8s-version and k8s-platform only exist on the webhook template.
+  webhook_only_fields:
+    - k8s-version
+    - k8s-platform
+  # Labels that always suppress bot activity on an issue, regardless of
+  # what the FSM or classifier would otherwise do.
+  exclusion_labels:
+    - do-not-triage
+    - long-term
+
+# Paths the agent may touch autonomously vs. paths that always require a
+# human. See skills/kyverno/safe-boundaries.md for the full reasoning.
+safe_boundaries:
+  restricted_paths:
+    - api/kyverno/v1/
+    - pkg/cosign/
+    - pkg/notary/
+  autonomous_paths:
+    - "**/go.mod"
+    - "**/go.sum"
+    - config/crds/
