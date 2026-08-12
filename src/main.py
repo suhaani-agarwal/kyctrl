@@ -18,11 +18,17 @@ import hmac
 import os
 from pathlib import Path
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from loguru import logger
+from dotenv import load_dotenv
 
-from src.app_logging import setup_logging
+# Must run before any `src.*` import that reads os.environ at call time
+# (github_auth, runtime) — otherwise .env-only vars are invisible to them.
+load_dotenv()
+
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request  # noqa: E402
+from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
+from loguru import logger  # noqa: E402
+
+from src.app_logging import setup_logging  # noqa: E402
 from src.audit import entry_to_dict
 from src.events import EVENT_HANDLERS, Event
 from src.runtime import get_audit_writer, get_client, get_target_repo
