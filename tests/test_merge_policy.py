@@ -1,6 +1,8 @@
+from github import GithubException
+
 from src.agents.merge_policy import evaluate, is_excluded, parse_bump_title, semver_bump_type
 from src.config import DependabotPolicy
-from tests.test_github_tools import make_check_run, make_pr
+from tests.test_github_tools import make_pr, make_status
 
 
 def policy(**overrides):
@@ -45,7 +47,7 @@ def test_is_excluded_matches_module_path_substring():
 
 
 def test_evaluate_merges_clean_patch_bump():
-    pr = make_pr(check_runs=[make_check_run("unit-tests", "success")])
+    pr = make_pr(statuses=[make_status("unit-tests", "success")])
     pr.title = "chore(deps): bump github.com/google/go-containerregistry from 1.0.0 to 1.0.1 (#1)"
     decision = evaluate(pr, policy())
     assert decision.decision == "merge"
@@ -58,14 +60,16 @@ def test_evaluate_holds_major_bump():
     decision = evaluate(pr, policy())
     assert decision.decision == "hold"
     assert decision.rule == "major_bump"
+    assert decision.needs_human_review is True
 
 
 def test_evaluate_holds_excluded_package_even_if_patch():
-    pr = make_pr(check_runs=[make_check_run("unit-tests", "success")])
+    pr = make_pr(statuses=[make_status("unit-tests", "success")])
     pr.title = "chore(deps): bump github.com/sigstore/cosign/v3 from 3.1.2 to 3.1.3 (#3)"
     decision = evaluate(pr, policy(excluded_packages=["github.com/sigstore/cosign"]))
     assert decision.decision == "hold"
     assert decision.rule == "excluded_package"
+    assert decision.needs_human_review is True
 
 
 def test_evaluate_holds_on_hold_label():
@@ -74,14 +78,16 @@ def test_evaluate_holds_on_hold_label():
     decision = evaluate(pr, policy())
     assert decision.decision == "hold"
     assert decision.rule == "hold_label"
+    assert decision.needs_human_review is False  # a human already acted (applied the label); no extra label needed
 
 
 def test_evaluate_holds_when_ci_not_green():
-    pr = make_pr(check_runs=[])
+    pr = make_pr(statuses=[])
     pr.title = "chore(deps): bump foo from 1.0.0 to 1.0.1 (#5)"
     decision = evaluate(pr, policy())
     assert decision.decision == "hold"
     assert decision.rule == "ci_not_green"
+    assert decision.needs_human_review is False  # will clear on its own once CI finishes
 
 
 def test_evaluate_holds_when_pr_too_new():
@@ -90,6 +96,7 @@ def test_evaluate_holds_when_pr_too_new():
     decision = evaluate(pr, policy(min_pr_age_minutes=30))
     assert decision.decision == "hold"
     assert decision.rule == "too_new"
+    assert decision.needs_human_review is False  # will clear on its own once the PR ages past the minimum
 
 
 def test_evaluate_holds_unparseable_title():
@@ -98,10 +105,28 @@ def test_evaluate_holds_unparseable_title():
     decision = evaluate(pr, policy())
     assert decision.decision == "hold"
     assert decision.rule == "unparseable_bump"
+    assert decision.needs_human_review is True
+
+
+def test_evaluate_holds_when_checks_unavailable_instead_of_crashing():
+    """Regression test: this used to be an unguarded status-API call inside
+    evaluate() — a 403 (missing token permission, or historically the
+    Checks API being fundamentally unreachable by any fine-grained PAT —
+    see the comment on pr_checks_all_green) propagated as an uncaught
+    GithubException and crashed the whole agent run instead of holding."""
+    pr = make_pr()
+    pr.title = "chore(deps): bump foo from 1.0.0 to 1.0.1 (#8)"
+    pr.base.repo.get_commit.return_value.get_combined_status.side_effect = GithubException(
+        403, {"message": "Resource not accessible by personal access token"}, None
+    )
+    decision = evaluate(pr, policy())
+    assert decision.decision == "hold"
+    assert decision.rule == "checks_unavailable"
+    assert decision.needs_human_review is False  # a token/permissions issue, not a judgment call on the PR
 
 
 def test_evaluate_respects_patch_only_policy():
-    pr = make_pr(check_runs=[make_check_run("unit-tests", "success")])
+    pr = make_pr(statuses=[make_status("unit-tests", "success")])
     pr.title = "chore(deps): bump foo from 1.0.0 to 1.1.0 (#7)"  # minor
     decision = evaluate(pr, policy(auto_merge="patch_only"))
     assert decision.decision == "hold"

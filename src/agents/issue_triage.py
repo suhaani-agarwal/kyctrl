@@ -19,6 +19,7 @@ from claude_agent_sdk import (
     query,
     tool,
 )
+from github import GithubException
 from loguru import logger
 
 from src.agents.issue_fields import missing_bug_fields, uses_webhook_template
@@ -26,7 +27,15 @@ from src.agents.issue_fsm import STATES, state_label, validate_transition
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
 from src.events import Event, register_handler
-from src.runtime import can_use_tool, get_audit_writer, get_client, get_config, get_repo_variable, get_target_repo
+from src.runtime import (
+    can_use_tool,
+    get_audit_writer,
+    get_client,
+    get_config,
+    get_repo_variable,
+    get_target_repo,
+    single_turn_prompt,
+)
 from src.skills import load_skill
 from src.terminal import stream_agent_run
 from src.tools.github_tools import build_issue_tool_server
@@ -49,9 +58,16 @@ def _build_state_tool_server(issue, current_labels: set[str]):
         result = validate_transition(current_labels, args["target_state"])
         if not result.ok:
             return {"content": [{"type": "text", "text": f"REJECTED: {result.reason}"}], "is_error": True}
-        if result.from_state:
-            issue.remove_from_labels(state_label(result.from_state))
-        issue.add_to_labels(state_label(result.to_state))
+        try:
+            if result.from_state:
+                issue.remove_from_labels(state_label(result.from_state))
+            issue.add_to_labels(state_label(result.to_state))
+        except GithubException as e:
+            logger.warning(f"GitHub tool call failed (transition_issue_state): {e}")
+            return {
+                "content": [{"type": "text", "text": f"transition_issue_state failed: {e}"}],
+                "is_error": True,
+            }
         return {"content": [{"type": "text", "text": f"transitioned {result.from_state!r} -> {result.to_state!r}"}]}
 
     return create_sdk_mcp_server(name="issue-state-tools", tools=[transition_issue_state])
@@ -119,10 +135,14 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
     options = ClaudeAgentOptions(
         system_prompt=skill,
         mcp_servers={"github": issue_tools, "state": state_tools},
-        allowed_tools=[
-            "mcp__github__comment_on_issue",
-            "mcp__state__transition_issue_state",
-        ],
+        # See the matching comment in agents/dependabot.py: no built-in
+        # tools, no `allowed_tools` entries — every call to
+        # comment_on_issue/transition_issue_state falls through to
+        # `can_use_tool`, which is what actually enforces the kill switch
+        # and the tool-name allow-list, instead of being shadowed by a
+        # whole-tool `allowed_tools` entry.
+        tools=[],
+        allowed_tools=[],
         can_use_tool=can_use_tool,
         max_turns=6,
         sandbox=SandboxSettings(
@@ -149,7 +169,7 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
     )
 
     result = await stream_agent_run(
-        query(prompt=prompt, options=options),
+        query(prompt=single_turn_prompt(prompt), options=options),
         title=f"Issue Triage Agent — #{issue_number} ({classification})",
     )
 

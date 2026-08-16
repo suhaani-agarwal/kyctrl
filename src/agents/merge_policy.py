@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from github import GithubException
 from github.PullRequest import PullRequest
 
 from src.config import DependabotPolicy
@@ -30,6 +31,7 @@ class MergeDecision:
     decision: str  # "merge" | "hold"
     rule: str  # short machine-readable rule id, goes in the audit log's decision_reason
     reason: str  # human-readable explanation
+    needs_human_review: bool = False  # see evaluate() — which hold rules actually need a maintainer's judgment
 
 
 def semver_bump_type(old: str, new: str) -> str:
@@ -79,10 +81,16 @@ def evaluate(pr: PullRequest, policy: DependabotPolicy) -> MergeDecision:
             "unparseable_bump",
             f"Could not determine the semver bump type from the PR title ({pr.title!r}). "
             "Treating as ambiguous rather than guessing.",
+            needs_human_review=True,
         )
 
     if bump_type == "major":
-        return MergeDecision("hold", "major_bump", f"Major version bump of {package} — always reviewed by a human.")
+        return MergeDecision(
+            "hold",
+            "major_bump",
+            f"Major version bump of {package} — always reviewed by a human.",
+            needs_human_review=True,
+        )
 
     if policy.auto_merge == "none":
         return MergeDecision("hold", "policy_none", "dependabot.auto_merge is 'none' in the current config.")
@@ -93,7 +101,12 @@ def evaluate(pr: PullRequest, policy: DependabotPolicy) -> MergeDecision:
         )
 
     if is_excluded(package, policy.excluded_packages):
-        return MergeDecision("hold", "excluded_package", f"{package} is on the dependabot.excluded_packages list.")
+        return MergeDecision(
+            "hold",
+            "excluded_package",
+            f"{package} is on the dependabot.excluded_packages list.",
+            needs_human_review=True,
+        )
 
     age = pr_age_minutes(pr)
     if age < policy.min_pr_age_minutes:
@@ -103,7 +116,18 @@ def evaluate(pr: PullRequest, policy: DependabotPolicy) -> MergeDecision:
             f"PR is {age:.1f} minutes old; minimum is {policy.min_pr_age_minutes} minutes so CI has a real chance to run.",
         )
 
-    if not pr_checks_all_green(pr, policy.required_checks or None):
+    try:
+        checks_green = pr_checks_all_green(pr, policy.required_checks or None)
+    except GithubException as e:
+        # Same "never guess" philosophy as the unparseable-title case above:
+        # if we can't even determine CI status (missing token scope, a
+        # transient API failure), that's ambiguous, not green — hold,
+        # don't crash the whole run and don't merge on a guess.
+        return MergeDecision(
+            "hold", "checks_unavailable", f"Could not read CI check status ({e}); treating as not verified."
+        )
+
+    if not checks_green:
         return MergeDecision("hold", "ci_not_green", "Not all CI checks on the head commit are green yet.")
 
     return MergeDecision(

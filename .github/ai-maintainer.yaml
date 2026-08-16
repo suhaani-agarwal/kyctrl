@@ -33,6 +33,7 @@ dependabot:
   bot_usernames:
     - "dependabot[bot]"
     - "renovate[bot]"
+    - "suhaani-agarwal"
   # Packages that always require a human, regardless of semver bump —
   # security-sensitive or historically fragile dependencies.
   excluded_packages:

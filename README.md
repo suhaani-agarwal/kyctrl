@@ -79,8 +79,11 @@ cp .env.example .env   # fill in ANTHROPIC_API_KEY + either GITHUB_PAT (dev) or 
 python3 -m pytest tests/ -q          # 62 tests, no network required
 
 uvicorn src.main:app --reload --port 8000
-# in another terminal, forward a GitHub App's webhooks to localhost:
-pip install pysmee && pysmee forward <smee-channel-url> http://127.0.0.1:8000/webhook
+# in another terminal, forward the repo's webhooks to localhost
+# (gh's own extension — no third-party relay involved):
+gh extension install cli/gh-webhook
+gh webhook forward --repo=<owner>/<repo> --events=pull_request,issues,status \
+  --url=http://127.0.0.1:8000/webhook --secret=<GITHUB_WEBHOOK_SECRET>
 ```
 
 Open `http://127.0.0.1:8000/` for the dashboard.

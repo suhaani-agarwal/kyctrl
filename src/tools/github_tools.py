@@ -24,9 +24,41 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from claude_agent_sdk import McpSdkServerConfig, create_sdk_mcp_server, tool
-from github import Github
+from github import Github, GithubException
 from github.PullRequest import PullRequest
 from loguru import logger
+
+
+def _tool_error(action: str, exc: Exception) -> dict:
+    """Every `@tool` body below wraps its GitHub call with this instead of
+    letting the exception propagate. An uncaught `GithubException` (a
+    missing scope, a 404, a rate limit) would otherwise crash the whole
+    `query()` stream mid-run — see the 403 on `get_check_status` that a
+    Checks-scope-less PAT triggered live. Returning `is_error` instead lets
+    the model see what failed and decide what to do next (e.g. comment
+    without CI info instead of the entire run dying)."""
+    logger.warning(f"GitHub tool call failed ({action}): {exc}")
+    return {"content": [{"type": "text", "text": f"{action} failed: {exc}"}], "is_error": True}
+
+
+_STATUS_MARKER = "<!-- kyctrl:status-comment -->"
+
+
+def _upsert_comment(get_comments, create_comment, body: str) -> None:
+    """Keep exactly one bot status comment per PR/issue instead of stacking
+    a new one on every re-run — the "sticky status comment" pattern most
+    CI/preview bots use (a real webhook redelivery, a retried run, or
+    someone re-triggering the workflow would otherwise spam the thread with
+    near-duplicate comments, which is exactly what happened before this
+    existed). `get_comments`/`create_comment` are bound methods so this
+    works for both `PullRequest.get_issue_comments`/`create_issue_comment`
+    and `Issue.get_comments`/`create_comment`."""
+    marked_body = f"{body}\n\n{_STATUS_MARKER}"
+    for comment in get_comments():
+        if _STATUS_MARKER in (comment.body or ""):
+            comment.edit(marked_body)
+            return
+    create_comment(marked_body)
 
 # --- Plain functions: used by the deterministic rule engine, no LLM involved ---
 
@@ -43,15 +75,22 @@ def pr_age_minutes(pr: PullRequest) -> float:
 
 
 def pr_checks_all_green(pr: PullRequest, required_checks: list[str] | None = None) -> bool:
-    """True only if every required check (or every reported check, if the
-    list is empty) on the PR's head commit succeeded. Never guesses."""
-    commit = pr.base.repo.get_commit(pr.head.sha)
-    check_runs = list(commit.get_check_runs())
-    if not check_runs:
-        return False
-    by_name = {run.name: run.conclusion for run in check_runs}
-    names_to_check = required_checks or list(by_name.keys())
-    return all(by_name.get(name) == "success" for name in names_to_check)
+    """True only if every required status check (or the overall combined
+    state, if no specific list is given) on the PR's head commit succeeded.
+    Never guesses (no checks reported == not green, not "assume fine").
+
+    Deliberately uses the Commit *Statuses* API (`get_combined_status`),
+    not the Checks API (`get_check_runs`): fine-grained PATs can never be
+    granted access to Checks at all — a permanent GitHub limitation, not a
+    missing scope on any particular token (confirmed via GitHub staff:
+    https://github.com/orgs/community/discussions/129512) — only GitHub
+    Apps can call it. "Commit statuses" is a real, grantable fine-grained
+    permission, so this is what actually works for PAT-based auth."""
+    combined = pr.base.repo.get_commit(pr.head.sha).get_combined_status()
+    if required_checks:
+        by_context = {s.context: s.state for s in combined.statuses}
+        return all(by_context.get(name) == "success" for name in required_checks)
+    return combined.state == "success"
 
 
 def pr_files(pr: PullRequest) -> list[dict]:
@@ -94,25 +133,29 @@ def build_pr_tool_server(
 
     @tool("get_pr_diff", "Get the changed files and diffs for this pull request", {})
     async def get_pr_diff(_args: dict) -> dict:
-        return {"content": [{"type": "text", "text": str(pr_files(pr))}]}
+        try:
+            return {"content": [{"type": "text", "text": str(pr_files(pr))}]}
+        except GithubException as e:
+            return _tool_error("get_pr_diff", e)
 
-    @tool("get_check_status", "Get CI check results for this pull request's head commit", {})
+    @tool("get_check_status", "Get CI status for this pull request's head commit", {})
     async def get_check_status(_args: dict) -> dict:
-        commit = pr.base.repo.get_commit(pr.head.sha)
-        runs = [{"name": r.name, "conclusion": r.conclusion} for r in commit.get_check_runs()]
-        return {"content": [{"type": "text", "text": str(runs)}]}
+        try:
+            combined = pr.base.repo.get_commit(pr.head.sha).get_combined_status()
+            statuses = [{"context": s.context, "state": s.state} for s in combined.statuses]
+            return {"content": [{"type": "text", "text": str({"state": combined.state, "statuses": statuses})}]}
+        except GithubException as e:
+            return _tool_error("get_check_status", e)
 
     @tool("comment_on_pr", "Post a comment on this pull request", {"body": str})
     async def comment_on_pr(args: dict) -> dict:
-        pr.create_issue_comment(args["body"])
-        return {"content": [{"type": "text", "text": "commented"}]}
+        try:
+            _upsert_comment(pr.get_issue_comments, pr.create_issue_comment, args["body"])
+            return {"content": [{"type": "text", "text": "commented"}]}
+        except GithubException as e:
+            return _tool_error("comment_on_pr", e)
 
-    @tool("add_label", "Add a label to this pull request", {"label": str})
-    async def add_label(args: dict) -> dict:
-        pr.add_to_labels(args["label"])
-        return {"content": [{"type": "text", "text": f"labeled {args['label']}"}]}
-
-    tools = [get_pr_diff, get_check_status, comment_on_pr, add_label]
+    tools = [get_pr_diff, get_check_status, comment_on_pr]
 
     if allow_merge:
 
@@ -122,9 +165,12 @@ def build_pr_tool_server(
             {"summary": str},
         )
         async def approve_and_merge_pr(args: dict) -> dict:
-            pr.create_review(event="APPROVE", body=args["summary"])
-            result = pr.merge(merge_method="squash", commit_message=args["summary"])
-            return {"content": [{"type": "text", "text": f"merged={result.merged} sha={result.sha}"}]}
+            try:
+                pr.create_review(event="APPROVE", body=args["summary"])
+                result = pr.merge(merge_method="squash", commit_message=args["summary"])
+                return {"content": [{"type": "text", "text": f"merged={result.merged} sha={result.sha}"}]}
+            except GithubException as e:
+                return _tool_error("approve_and_merge_pr", e)
 
         tools.append(approve_and_merge_pr)
 
@@ -132,24 +178,21 @@ def build_pr_tool_server(
 
 
 def build_issue_tool_server(gh: Github, repo_full_name: str, issue_number: int) -> McpSdkServerConfig:
+    """Only `comment_on_issue` — label changes for issue triage go through
+    `transition_issue_state` (see `agents/issue_triage.py`'s `state_tools`
+    server), which validates against the FSM before touching a label.
+    There's deliberately no generic `add_label`/`remove_label` tool here:
+    an issue's state label should only ever move through a validated
+    transition, never as a free-form model choice."""
     repo = gh.get_repo(repo_full_name)
     issue = repo.get_issue(issue_number)
 
     @tool("comment_on_issue", "Post a comment on this issue", {"body": str})
     async def comment_on_issue(args: dict) -> dict:
-        issue.create_comment(args["body"])
-        return {"content": [{"type": "text", "text": "commented"}]}
+        try:
+            _upsert_comment(issue.get_comments, issue.create_comment, args["body"])
+            return {"content": [{"type": "text", "text": "commented"}]}
+        except GithubException as e:
+            return _tool_error("comment_on_issue", e)
 
-    @tool("add_label", "Add a label to this issue", {"label": str})
-    async def add_label(args: dict) -> dict:
-        issue.add_to_labels(args["label"])
-        return {"content": [{"type": "text", "text": f"labeled {args['label']}"}]}
-
-    @tool("remove_label", "Remove a label from this issue", {"label": str})
-    async def remove_label(args: dict) -> dict:
-        issue.remove_from_labels(args["label"])
-        return {"content": [{"type": "text", "text": f"removed {args['label']}"}]}
-
-    return create_sdk_mcp_server(
-        name="github-issue-tools", tools=[comment_on_issue, add_label, remove_label]
-    )
+    return create_sdk_mcp_server(name="github-issue-tools", tools=[comment_on_issue])

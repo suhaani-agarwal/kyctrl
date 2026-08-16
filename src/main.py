@@ -45,6 +45,7 @@ app = FastAPI(title="kyctrl — Kyverno AI Maintainer Assistant")
 EXTERNAL_ID_FIELD = {
     "pull_request": lambda p: f"gh-pr-{p['pull_request']['number']}",
     "issues": lambda p: f"gh-issue-{p['issue']['number']}",
+    "status": lambda p: f"gh-status-{p['sha'][:12]}",
 }
 
 
