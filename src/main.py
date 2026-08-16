@@ -30,22 +30,51 @@ from loguru import logger  # noqa: E402
 
 from src.app_logging import setup_logging  # noqa: E402
 from src.audit import entry_to_dict
-from src.events import EVENT_HANDLERS, Event
+from src.events import EVENT_HANDLERS, Event, dispatch
 from src.runtime import get_audit_writer, get_client, get_target_repo
+from src.slack_app import get_bolt_app
 
-# Side-effect imports: populate EVENT_HANDLERS.
+# Side-effect imports: populate EVENT_HANDLERS. Several modules can (and do)
+# register on the same event type — see events.py's fan-out docstring.
 import src.agents.dependabot  # noqa: F401,E402
 import src.agents.issue_triage  # noqa: F401,E402
+import src.agents.coach  # noqa: F401,E402
+import src.agents.security_agent  # noqa: F401,E402
+import src.agents.pattern_agent  # noqa: F401,E402
+import src.agents.reproduction  # noqa: F401,E402
+import src.agents.qa_assistant  # noqa: F401,E402
+import src.agents.doc_index_refresh  # noqa: F401,E402
 from src.tools.github_tools import set_repo_variable  # noqa: E402
 
 setup_logging()
 
 app = FastAPI(title="kyctrl — Kyverno AI Maintainer Assistant")
 
+_slack_handler = None
+_bolt_app = get_bolt_app()
+if _bolt_app is not None:
+    from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+
+    _slack_handler = AsyncSlackRequestHandler(_bolt_app)
+
+
+@app.post("/slack/events")
+async def slack_events(request: Request):
+    """Mounts the Slack Bolt app (see slack_app.py) at a single route — Bolt
+    owns signature verification, the url_verification challenge, and event
+    routing from here; this endpoint exists only when Slack credentials are
+    configured (see get_bolt_app's docstring)."""
+    if _slack_handler is None:
+        raise HTTPException(status_code=503, detail="Slack integration not configured (SLACK_BOT_TOKEN/SLACK_SIGNING_SECRET unset)")
+    return await _slack_handler.handle(request)
+
 EXTERNAL_ID_FIELD = {
     "pull_request": lambda p: f"gh-pr-{p['pull_request']['number']}",
     "issues": lambda p: f"gh-issue-{p['issue']['number']}",
     "status": lambda p: f"gh-status-{p['sha'][:12]}",
+    "discussion": lambda p: f"gh-discussion-{p['discussion']['number']}",
+    "discussion_comment": lambda p: f"gh-discussion-comment-{p['comment']['id']}",
+    "workflow_run": lambda p: f"gh-workflow-run-{p['workflow_run']['id']}",
 }
 
 
@@ -88,12 +117,31 @@ async def webhook(request: Request, background_tasks: BackgroundTasks):
     )
     logger.info(f"Received event: {event.type}.{event.action} ({event.external_id})")
 
-    handler = EVENT_HANDLERS.get(event.type)
-    if handler is None:
+    if event.type not in EVENT_HANDLERS:
         logger.debug(f"No handler registered for event type {event.type!r}, ignoring")
         return {"status": "ignored", "reason": "no handler for this event type"}
 
-    background_tasks.add_task(handler, event)
+    background_tasks.add_task(dispatch, event)
+    return {"status": "accepted"}
+
+
+@app.post("/internal/cron/{job}")
+async def cron_trigger(job: str, request: Request, background_tasks: BackgroundTasks):
+    """Ingress for GitHub Actions `schedule:`-triggered jobs (Pattern Agent,
+    doc-index refresh) — see `.github/workflows/pattern-agent-cron.yaml`
+    (the doc-index-refresh equivalent isn't built yet; add it the same way
+    when needed). Not GitHub-HMAC-signed like `/webhook` (these aren't
+    GitHub webhook deliveries), so a separate shared-secret header is the
+    auth mechanism instead."""
+    secret = os.environ.get("CRON_SECRET")
+    if not secret or not hmac.compare_digest(request.headers.get("X-Cron-Secret", ""), secret):
+        raise HTTPException(status_code=401, detail="Invalid or missing X-Cron-Secret")
+    if job not in ("pattern-agent", "doc-index-refresh"):
+        raise HTTPException(status_code=404, detail=f"Unknown cron job {job!r}")
+
+    event = Event(source="cron", type=job, external_id=f"cron-{job}-{request.headers.get('X-Cron-Run-Id', 'manual')}", payload={})
+    logger.info(f"Received cron trigger: {job}")
+    background_tasks.add_task(dispatch, event)
     return {"status": "accepted"}
 
 

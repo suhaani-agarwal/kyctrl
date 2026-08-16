@@ -9,7 +9,11 @@ on Pydantic — one less conceptual layer.
 Three columns are unused today on purpose (`parent_run_id`, `overridden_at`
 /`overridden_by`, `memory_refs`) — forward-compatible seams for Dimensions
 2/3/4 of the extra-features roadmap. Adding those features later means
-populating existing nullable columns, not a migration.
+populating existing nullable columns, not a migration. `memory_refs`
+specifically is reserved for Dimension 3's Graphiti integration (see
+docs/kyctrl_extra_features.md) — the Graphiti node/edge UUIDs an agent's
+`graphiti.add_episode(...)` call returned after this run, not a
+self-reference into this table.
 """
 
 from __future__ import annotations
@@ -50,7 +54,7 @@ class AuditEntry(SQLModel, table=True):
     parent_run_id: int | None = None  # subagent hierarchies (Dimension 2)
     overridden_at: datetime | None = None  # maintainer reverted this decision (Dimension 4)
     overridden_by: str | None = None
-    memory_refs: str | None = None  # JSON list of prior AuditEntry ids drawn on (Dimension 3)
+    memory_refs: str | None = None  # JSON list of Graphiti node/edge UUIDs drawn on (Dimension 3)
 
 
 def get_engine(db_path: str = "audit.sqlite3"):

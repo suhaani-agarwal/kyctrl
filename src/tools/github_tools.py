@@ -106,6 +106,23 @@ def pr_files(pr: PullRequest) -> list[dict]:
     ]
 
 
+def dispatch_reproduction_workflow(gh: Github, repo_full_name: str, workflow_file: str, inputs: dict[str, str]) -> bool:
+    """Triggers the KinD reproduction workflow via `workflow_dispatch` — the
+    deterministic half of the Reproduction Agent (see `agents/reproduction.py`).
+    Whether to dispatch at all is decided in Python before this is ever
+    called (a complete, non-security bug report per Triage's classification)
+    — this function only performs the dispatch, no judgment here. Returns
+    False (never raises) on failure so the caller can record it in the audit
+    log instead of crashing the triggering agent's run."""
+    try:
+        repo = gh.get_repo(repo_full_name)
+        workflow = repo.get_workflow(workflow_file)
+        return workflow.create_dispatch(ref=repo.default_branch, inputs=inputs)
+    except GithubException as e:
+        logger.warning(f"dispatch_reproduction_workflow failed: {e}")
+        return False
+
+
 def set_repo_variable(gh: Github, repo_full_name: str, name: str, value: str) -> None:
     """Never exposed to the agent as a tool — only the dashboard's
     kill-switch endpoint calls this directly."""

@@ -1,0 +1,21 @@
+# Weekly trigger for the Pattern Agent — see src/agents/pattern_agent.py.
+# Lives in kyctrl's own repo (unlike reproduce-issue.yaml): this just pings
+# kyctrl's deployed URL on a schedule, it doesn't need to run inside the
+# target repo at all.
+
+name: Pattern Agent (weekly)
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Monday 09:00 UTC
+  workflow_dispatch: {} # manual trigger, for testing
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call kyctrl's cron ingress
+        run: |
+          curl -sf -X POST "${{ vars.KYCTRL_URL }}/internal/cron/pattern-agent" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "X-Cron-Run-Id: ${{ github.run_id }}"

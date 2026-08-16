@@ -26,6 +26,7 @@ from loguru import logger
 
 class GitHubAuth(Protocol):
     def get_client(self, repo_full_name: str) -> Github: ...
+    def get_token(self, repo_full_name: str) -> str: ...
 
 
 class GitHubPATAuth:
@@ -36,6 +37,9 @@ class GitHubPATAuth:
 
     def get_client(self, repo_full_name: str) -> Github:
         return Github(auth=Auth.Token(self._token))
+
+    def get_token(self, repo_full_name: str) -> str:
+        return self._token
 
 
 class GitHubAppAuth:
@@ -50,6 +54,16 @@ class GitHubAppAuth:
         owner, repo = repo_full_name.split("/", 1)
         installation = self._integration.get_repo_installation(owner, repo)
         return self._integration.get_github_for_installation(installation.id)
+
+    def get_token(self, repo_full_name: str) -> str:
+        """Raw bearer token for the rare caller that needs one directly
+        instead of a `Github` client — currently just
+        `discussion_tools.add_discussion_comment`, since GitHub Discussions
+        has no REST API and PyGithub has no GraphQL helper to hand a token
+        to internally."""
+        owner, repo = repo_full_name.split("/", 1)
+        installation = self._integration.get_repo_installation(owner, repo)
+        return self._integration.get_access_token(installation.id).token
 
 
 def get_auth_from_env() -> GitHubAuth:

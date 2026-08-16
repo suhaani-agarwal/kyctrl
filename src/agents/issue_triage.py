@@ -24,6 +24,7 @@ from loguru import logger
 
 from src.agents.issue_fields import missing_bug_fields, uses_webhook_template
 from src.agents.issue_fsm import STATES, state_label, validate_transition
+from src.agents.reproduction import trigger_reproduction
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
 from src.events import Event, register_handler
@@ -179,7 +180,7 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
     elif result.is_error:
         action_result = f"failed: {result.subtype}"
 
-    return audit.write(
+    entry = audit.write(
         trigger_event="issues",
         external_id=external_id,
         workflow_name=WORKFLOW,
@@ -193,6 +194,17 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
         total_cost_usd=result.total_cost_usd if result else None,
         duration_ms=result.duration_ms if result else None,
     )
+
+    # Deterministic handoff to the Reproduction Agent (Dimension 2): only a
+    # complete bug report, never a security-labeled issue (that's
+    # security_agent.py's exclusive concern — see `.github/ai-maintainer.yaml`'s
+    # `issue_triage.exclusion_labels`, which already keeps security issues
+    # out of this function entirely, so the check below is a second,
+    # explicit guard rather than reliance on that alone).
+    if classification == "bug" and not missing and "security" not in labels:
+        await trigger_reproduction(issue_number, f"{external_id}-repro", parent_run_id=entry.id)
+
+    return entry
 
 
 @register_handler("issues")

@@ -49,6 +49,13 @@ def get_client() -> Github:
     return get_github_auth().get_client(get_target_repo())
 
 
+def get_github_token() -> str:
+    """Raw bearer token, for the rare caller that needs one directly instead
+    of a `Github` client (currently only `discussion_tools.add_discussion_comment`
+    — GitHub Discussions has no REST API, so PyGithub can't front the call)."""
+    return get_github_auth().get_token(get_target_repo())
+
+
 def get_repo_variable(name: str) -> str | None:
     """The live half of the two-layer kill switch — see
     `config.kill_switch_engaged`. Any failure (repo has no such variable,
@@ -71,7 +78,14 @@ def get_repo_variable(name: str) -> str | None:
 # switch below; see `CanUseToolShadowedWarning`). This function is
 # therefore the *only* place tool access is decided, so it has to enforce
 # both scoping rules itself: kill switch, and "only tools we built."
-_ALLOWED_TOOL_PREFIXES = ("mcp__github__", "mcp__state__")
+_ALLOWED_TOOL_PREFIXES = (
+    "mcp__github__",
+    "mcp__state__",
+    "mcp__qa__",
+    "mcp__pattern__",
+    "mcp__coach__",
+    "mcp__security__",
+)
 
 
 async def can_use_tool(tool_name: str, input_data: dict, context) -> PermissionResultAllow | PermissionResultDeny:

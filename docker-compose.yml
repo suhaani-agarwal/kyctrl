@@ -7,3 +7,24 @@ services:
       - .env
     volumes:
       - ./audit.sqlite3:/app/audit.sqlite3
+    depends_on:
+      - neo4j
+
+  # Shared graph store for the Q&A assistant's LightRAG-indexed doc graph
+  # (see src/graph.py, tools/doc_retriever.py) and, once built, the
+  # fast-follow tree-sitter code graph and Graphiti temporal memory — see
+  # docs/planning/ for the full architecture. APOC is required by LightRAG's
+  # Neo4j storage backend for schema/index setup.
+  neo4j:
+    image: neo4j:5-community
+    ports:
+      - "7474:7474"  # browser/admin UI
+      - "7687:7687"  # bolt
+    environment:
+      NEO4J_AUTH: "${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:?set NEO4J_PASSWORD in .env}"
+      NEO4JLABS_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  neo4j_data:

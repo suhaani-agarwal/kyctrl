@@ -1,0 +1,102 @@
+# Reproduction Agent's KinD half — see src/agents/reproduction.py.
+#
+# NOTE: this workflow belongs in the TARGET repository (the repo kyctrl is
+# watching — e.g. kyverno/kyverno or your demo repo), not in kyctrl's own
+# repo, since it needs to run against that repo's issues and commit its own
+# comment back to them. It's kept here as the reference copy to install
+# there — same relationship as .github/ai-maintainer.yaml being "the
+# example config file" per docs/planning/kyctrl_requirements.md.
+#
+# kyctrl's Python side (reproduction.py) only ever decides *whether* to
+# dispatch this and records that it did — this workflow does the actual
+# KinD work and posts its own findings directly via `gh issue comment`,
+# using the run's own GITHUB_TOKEN. No round-trip through kyctrl for
+# posting; kyctrl only re-confirms success/failure via the `workflow_run`
+# webhook (see reproduction.py's `handle_workflow_run`).
+
+name: Reproduce Issue (KinD)
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to reproduce"
+        required: true
+      policy_yaml:
+        description: "Policy manifest(s) extracted from the issue body"
+        required: true
+      resource_yaml:
+        description: "Resource manifest(s) extracted from the issue body (may be empty)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create KinD cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: kyctrl-repro
+
+      - name: Write extracted manifests
+        run: |
+          cat > /tmp/policy.yaml <<'POLICY_EOF'
+          ${{ github.event.inputs.policy_yaml }}
+          POLICY_EOF
+          cat > /tmp/resource.yaml <<'RESOURCE_EOF'
+          ${{ github.event.inputs.resource_yaml }}
+          RESOURCE_EOF
+
+      - name: Install Kyverno
+        run: |
+          helm repo add kyverno https://kyverno.github.io/kyverno/
+          helm repo update
+          helm install kyverno kyverno/kyverno -n kyverno --create-namespace --wait --timeout 3m
+
+      - name: Apply policy and resource, capture behavior
+        id: repro
+        run: |
+          set +e
+          kubectl apply -f /tmp/policy.yaml > /tmp/policy_apply.log 2>&1
+          sleep 5  # let the policy become active before the resource hits the webhook
+          kubectl apply -f /tmp/resource.yaml > /tmp/resource_apply.log 2>&1
+          RESOURCE_EXIT=$?
+          kubectl get events --sort-by=.lastTimestamp -A > /tmp/events.log 2>&1
+          kubectl get policyreport,clusterpolicyreport -A -o yaml > /tmp/policy_reports.log 2>&1
+          echo "resource_exit=$RESOURCE_EXIT" >> "$GITHUB_OUTPUT"
+
+      - name: Post findings to the issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## Reproduction attempt (automated)"
+            echo ""
+            echo "Kyverno version: \$(helm list -n kyverno -o json | jq -r '.[0].app_version')"
+            echo ""
+            echo "### Policy apply"
+            echo '```'
+            cat /tmp/policy_apply.log
+            echo '```'
+            echo ""
+            echo "### Resource apply"
+            echo '```'
+            cat /tmp/resource_apply.log
+            echo '```'
+            echo ""
+            echo "### Relevant events"
+            echo '```'
+            tail -30 /tmp/events.log
+            echo '```'
+          } > /tmp/comment_body.md
+          gh issue comment "${{ github.event.inputs.issue_number }}" \
+            --repo "${{ github.repository }}" \
+            --body-file /tmp/comment_body.md

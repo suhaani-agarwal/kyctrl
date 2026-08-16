@@ -51,6 +51,50 @@ class SafeBoundaries(BaseModel):
     autonomous_paths: list[str] = Field(default_factory=list)
 
 
+class QaAssistantEscalation(BaseModel):
+    slack_channel: str = "kyverno-maintainers"
+    github_maintainer_logins: list[str] = Field(default_factory=list)
+
+
+class QaAssistantPolicy(BaseModel):
+    # Minimum self-reported confidence the agent must clear before an
+    # answer is posted publicly — see qa_assistant.py's confidence gate,
+    # a deterministic check, never the LLM's own call. "high" required by
+    # default: never guess, per the issue's explicit requirement.
+    confidence_threshold: str = "high"
+    max_search_results: int = 5
+    default_kyverno_version: str = "latest"
+    slack_channels: list[str] = Field(default_factory=lambda: ["kyverno"])
+    discussion_categories: list[str] = Field(default_factory=list)
+    escalation: QaAssistantEscalation = Field(default_factory=QaAssistantEscalation)
+
+    @field_validator("confidence_threshold")
+    @classmethod
+    def _valid_confidence(cls, v: str) -> str:
+        allowed = {"high", "medium", "low"}
+        if v not in allowed:
+            raise ValueError(f"qa_assistant.confidence_threshold must be one of {allowed}, got {v!r}")
+        return v
+
+
+class PatternAgentPolicy(BaseModel):
+    lookback_days: int = 7
+    min_cluster_size: int = 2
+
+
+class CoachAgentPolicy(BaseModel):
+    exclude_bot_authors: bool = True
+
+
+class SecurityAgentPolicy(BaseModel):
+    trigger_labels: list[str] = Field(default_factory=lambda: ["security"])
+    private_slack_channel: str = "kyverno-security-private"
+
+
+class ReproductionAgentPolicy(BaseModel):
+    workflow_file: str = "reproduce-issue.yaml"
+
+
 class AiMaintainerConfig(BaseModel):
     enabled: bool = True
     workflows: dict[str, bool] = Field(default_factory=dict)
@@ -58,6 +102,11 @@ class AiMaintainerConfig(BaseModel):
     dependabot: DependabotPolicy = Field(default_factory=DependabotPolicy)
     issue_triage: IssueTriagePolicy = Field(default_factory=IssueTriagePolicy)
     safe_boundaries: SafeBoundaries = Field(default_factory=SafeBoundaries)
+    qa_assistant: QaAssistantPolicy = Field(default_factory=QaAssistantPolicy)
+    pattern_agent: PatternAgentPolicy = Field(default_factory=PatternAgentPolicy)
+    coach_agent: CoachAgentPolicy = Field(default_factory=CoachAgentPolicy)
+    security_agent: SecurityAgentPolicy = Field(default_factory=SecurityAgentPolicy)
+    reproduction_agent: ReproductionAgentPolicy = Field(default_factory=ReproductionAgentPolicy)
 
     def workflow_enabled(self, name: str) -> bool:
         """A workflow only runs if both the global switch and its own switch are on."""

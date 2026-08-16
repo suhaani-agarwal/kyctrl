@@ -11,3 +11,14 @@ httpx==0.28.1
 rich==15.0.0
 loguru==0.7.3
 python-dotenv==1.0.1
+
+# Multi-agent architecture (Dimension 2) + Slack/Discussions Q&A assistant
+slack-bolt==1.30.0        # events adapter (mounted into FastAPI) + AI Assistant surface
+neo4j==6.2.0              # shared graph store — src/graph.py
+lightrag-hku==1.5.6       # incremental, version-tagged doc indexing + hybrid retrieval,
+                           # configured with graph_storage="Neo4JStorage" (see tools/doc_retriever.py)
+anthropic==0.122.0        # LightRAG's llm_model_func (lightrag.llm.anthropic.anthropic_complete)
+voyageai==0.5.0           # LightRAG's embedding_func (lightrag.llm.voyageai.voyageai_embed) —
+                           # Anthropic has no embeddings endpoint of its own
+markdownify==1.2.3        # HTML -> markdown for scripts/crawl_docs.py (no browser needed;
+                           # kyverno.io is server-rendered — see that script's docstring)

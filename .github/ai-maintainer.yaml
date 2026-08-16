@@ -19,12 +19,25 @@ workflows:
   pr_hygiene: false        # stretch goal, off by default in the prototype
   issue_triage: true
   codegen_gate: false      # narrative-only in the prototype, not implemented yet
+  # Dimension 2 (multi-agent system) + Slack/Discussions Q&A — all off by
+  # default until their infra (Neo4j, Slack app credentials) is wired up in
+  # a given deployment; see README and docs/TESTING.md.
+  qa_assistant: false
+  pattern_agent: false
+  coach_agent: false
+  security_agent: false
+  reproduction_agent: false
 
 # Rate limiting — max actions per hour, per workflow. Prevents runaway
 # behavior in all edge cases (e.g. a webhook replay storm).
 rate_limits:
   dependabot_auto_merge: 10
   issue_triage: 20
+  qa_assistant: 20
+  coach_agent: 15
+  security_agent: 10
+  pattern_agent: 1
+  reproduction_agent: 5
 
 dependabot:
   # patch_and_minor | patch_only | none
@@ -83,10 +96,14 @@ issue_triage:
     - k8s-version
     - k8s-platform
   # Labels that always suppress bot activity on an issue, regardless of
-  # what the FSM or classifier would otherwise do.
+  # what the FSM or classifier would otherwise do. `security` is included
+  # so Triage never touches a vulnerability report — that's exclusively
+  # security_agent.py's concern (see below), and the two must never race on
+  # the same issue.
   exclusion_labels:
     - do-not-triage
     - long-term
+    - security
 
 # Paths the agent may touch autonomously vs. paths that always require a
 # human. See skills/kyverno/safe-boundaries.md for the full reasoning.
@@ -99,3 +116,39 @@ safe_boundaries:
     - "**/go.mod"
     - "**/go.sum"
     - config/crds/
+
+# Dimension 2 multi-agent policies + the Slack/Discussions Q&A assistant.
+# See docs/kyctrl_extra_features.md Dimension 2 and skills/kyverno/*.md for
+# each agent's grounding.
+qa_assistant:
+  # Minimum self-reported confidence required before the agent posts an
+  # answer publicly. Below this, it escalates to a maintainer instead of
+  # guessing — never lowered casually, this is the "never guess" guarantee.
+  confidence_threshold: high
+  max_search_results: 5
+  default_kyverno_version: latest
+  slack_channels:
+    - kyverno
+  discussion_categories:
+    - "Q&A"
+    - General
+  escalation:
+    slack_channel: kyverno-maintainers
+    # Filled in by a real maintainer at deploy time — deliberately left
+    # empty here rather than inventing GitHub usernames.
+    github_maintainer_logins: []
+
+pattern_agent:
+  lookback_days: 7
+  min_cluster_size: 2
+
+coach_agent:
+  exclude_bot_authors: true
+
+security_agent:
+  trigger_labels:
+    - security
+  private_slack_channel: kyverno-security-private
+
+reproduction_agent:
+  workflow_file: reproduce-issue.yaml
