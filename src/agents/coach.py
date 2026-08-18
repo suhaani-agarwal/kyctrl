@@ -20,18 +20,22 @@ prompt, not left for the model to notice or miss.
 
 from __future__ import annotations
 
+import json
+
 from claude_agent_sdk import ClaudeAgentOptions, SandboxNetworkConfig, SandboxSettings, query
 from loguru import logger
 
-from src.agents._shared import is_bot_author
+from src.agents._shared import is_bot_author, memory_search, memory_write
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
 from src.events import Event, register_handler
+from src.memory import build_memory_tool_server
 from src.runtime import (
     can_use_tool,
     get_audit_writer,
     get_client,
     get_config,
+    get_memory_client,
     get_repo_variable,
     get_target_repo,
     single_turn_prompt,
@@ -107,9 +111,16 @@ async def handle_coach_pr(pr_number: int, external_id: str, parent_run_id: int |
     tool_server = build_pr_tool_server(gh, repo_full_name, pr_number, allow_merge=False)
     skill = load_skill("coach")
 
+    # Dimension 3 — see the matching comment in agents/dependabot.py.
+    memory = get_memory_client()
+    memory_facts = await memory_search(f"contributor {pr.user.login} pull request: {pr.title}")
+    mcp_servers = {"coach": tool_server}
+    if memory is not None:
+        mcp_servers["memory"] = build_memory_tool_server(memory, default_limit=config.memory.search_top_k)
+
     options = ClaudeAgentOptions(
         system_prompt=skill,
-        mcp_servers={"coach": tool_server},
+        mcp_servers=mcp_servers,
         tools=[],
         allowed_tools=[],
         can_use_tool=can_use_tool,
@@ -130,7 +141,8 @@ async def handle_coach_pr(pr_number: int, external_id: str, parent_run_id: int |
 
     prompt = (
         f"PR #{pr_number} by {pr.user.login!r}: {pr.title!r}\n"
-        f"{restricted_note}\n\n"
+        f"{restricted_note}\n"
+        f"Relevant memory (this contributor's history, similar past PRs): {memory_facts or 'none found'}\n\n"
         f"Call `get_pr_diff` to see the changed files, then post one encouraging, specific comment "
         f"via `comment_on_pr` — mentor tone per the skill doc, not a generic checklist. Point out "
         f"one or two concrete things (style, test coverage, a Kyverno convention) and link the "
@@ -148,6 +160,15 @@ async def handle_coach_pr(pr_number: int, external_id: str, parent_run_id: int |
     elif result.is_error:
         action_result = f"failed: {result.subtype}"
 
+    memory_refs = await memory_write(
+        name=f"{repo_full_name}:pr-{pr_number}",
+        episode_body=(
+            f"Coach Agent reviewed PR #{pr_number} by {pr.user.login!r} ({pr.title!r}): "
+            f"restricted_paths_touched={restricted_hits or 'none'}. Agent action result: {action_result}."
+        ),
+        source_description=WORKFLOW,
+    )
+
     return audit.write(
         trigger_event="pull_request",
         external_id=external_id,
@@ -162,6 +183,7 @@ async def handle_coach_pr(pr_number: int, external_id: str, parent_run_id: int |
         parent_run_id=parent_run_id,
         total_cost_usd=result.total_cost_usd if result else None,
         duration_ms=result.duration_ms if result else None,
+        memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
 
 

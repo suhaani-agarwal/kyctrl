@@ -1,0 +1,2330 @@
+{
+  "Helm<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-001",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 3,
+    "update_time": 1786969532,
+    "_id": "Helm<SEP>Kyverno"
+  },
+  "Kyverno<SEP>YAML Manifest": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 2,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>YAML Manifest"
+  },
+  "Kyverno<SEP>Kyverno Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-001",
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 3,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>Kyverno Namespace"
+  },
+  "Policy Reports<SEP>Reports Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Policy Reports<SEP>Reports Controller"
+  },
+  "Admission Controller<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 2,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Admission Controller<SEP>Kyverno"
+  },
+  "API Server<SEP>Admission Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "API Server<SEP>Admission Controller"
+  },
+  "Background Controller<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Background Controller<SEP>Kyverno"
+  },
+  "Background Controller<SEP>Cleanup Policies": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Background Controller<SEP>Cleanup Policies"
+  },
+  "Admission Controller<SEP>Policy Exceptions": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Admission Controller<SEP>Policy Exceptions"
+  },
+  "Kyverno<SEP>Reports Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>Reports Controller"
+  },
+  "Cleanup Controller<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Cleanup Controller<SEP>Kyverno"
+  },
+  "Cleanup Controller<SEP>Cleanup Policies": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Cleanup Controller<SEP>Cleanup Policies"
+  },
+  "Kyverno<SEP>Services": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>Services"
+  },
+  "Kyverno<SEP>ServiceAccounts": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>ServiceAccounts"
+  },
+  "Helm Chart<SEP>High Availability Installation": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Helm Chart<SEP>High Availability Installation"
+  },
+  "ConfigMaps<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "ConfigMaps<SEP>Kyverno"
+  },
+  "Helm Chart<SEP>Kyverno Repository": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Helm Chart<SEP>Kyverno Repository"
+  },
+  "Admission Controller<SEP>High Availability Installation": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001",
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Admission Controller<SEP>High Availability Installation"
+  },
+  "Kyverno<SEP>Secrets": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>Secrets"
+  },
+  "Artifact Hub<SEP>Helm Chart": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Artifact Hub<SEP>Helm Chart"
+  },
+  "Helm Chart<SEP>Production Environment": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Helm Chart<SEP>Production Environment"
+  },
+  "Kyverno<SEP>ValidatingWebhookConfigurations": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>ValidatingWebhookConfigurations"
+  },
+  "High Availability Installation<SEP>Replicas": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "High Availability Installation<SEP>Replicas"
+  },
+  "Admission Controller<SEP>Deployments": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Admission Controller<SEP>Deployments"
+  },
+  "Helm Chart<SEP>Non-Production Environment": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Helm Chart<SEP>Non-Production Environment"
+  },
+  "Kyverno<SEP>MutatingWebhookConfigurations": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>MutatingWebhookConfigurations"
+  },
+  "Background Controller<SEP>Deployments": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Background Controller<SEP>Deployments"
+  },
+  "Replicas<SEP>Scale": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Replicas<SEP>Scale"
+  },
+  "CustomResourceDefinitions<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "CustomResourceDefinitions<SEP>Kyverno"
+  },
+  "Deployments<SEP>Reports Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Deployments<SEP>Reports Controller"
+  },
+  "Performance<SEP>Replicas": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Performance<SEP>Replicas"
+  },
+  "Kyverno Namespace<SEP>Namespace Selector": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno Namespace<SEP>Namespace Selector"
+  },
+  "Cluster Topology<SEP>High Availability Installation": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001",
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Cluster Topology<SEP>High Availability Installation"
+  },
+  "Kubernetes<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002",
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002",
+      "https://kyverno.io/docs/introduction/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-001",
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 8,
+    "update_time": 1786969672,
+    "_id": "Kubernetes<SEP>Kyverno"
+  },
+  "Cleanup Controller<SEP>Deployments": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Cleanup Controller<SEP>Deployments"
+  },
+  "Helm Chart<SEP>Kyverno README": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Helm Chart<SEP>Kyverno README"
+  },
+  "Immutable Label<SEP>Namespace Selector": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Immutable Label<SEP>Namespace Selector"
+  },
+  "Admission Controller<SEP>Kyverno Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Admission Controller<SEP>Kyverno Namespace"
+  },
+  "Readiness Checks<SEP>Reports Server": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Readiness Checks<SEP>Reports Server"
+  },
+  "Kubernetes Compatibility<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kubernetes Compatibility<SEP>Kyverno"
+  },
+  "Kyverno<SEP>Reports Server": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>Reports Server"
+  },
+  "Fail Closed Mode<SEP>Webhook": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Fail Closed Mode<SEP>Webhook"
+  },
+  "Kyverno<SEP>Pod Security Standard Policies": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>Pod Security Standard Policies"
+  },
+  "Kubernetes API Server<SEP>Validation Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kubernetes API Server<SEP>Validation Policy"
+  },
+  "Kyverno<SEP>YAML Manifests": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno<SEP>YAML Manifests"
+  },
+  "Cluster Policy<SEP>Pod": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Cluster Policy<SEP>Pod"
+  },
+  "Kyverno Namespace<SEP>Namespace Selectors": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Kyverno Namespace<SEP>Namespace Selectors"
+  },
+  "EKS<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "EKS<SEP>Kyverno"
+  },
+  "Helm<SEP>Pre-Release Versions": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Helm<SEP>Pre-Release Versions"
+  },
+  "Cluster Operability<SEP>Fail Closed Mode": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Cluster Operability<SEP>Fail Closed Mode"
+  },
+  "AKS<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "AKS<SEP>Kyverno"
+  },
+  "Main Development Branch<SEP>Testing": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Main Development Branch<SEP>Testing"
+  },
+  "Tagged Release<SEP>YAML Manifests": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969147,
+    "update_time": 1786969147,
+    "_id": "Tagged Release<SEP>YAML Manifests"
+  },
+  "Chart Values<SEP>Namespaces": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Chart Values<SEP>Namespaces"
+  },
+  "Kyverno<SEP>OpenShift": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kyverno<SEP>OpenShift"
+  },
+  "Cluster Policy<SEP>Policy Rules": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Cluster Policy<SEP>Policy Rules"
+  },
+  "Helm<SEP>Production Installation": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Helm<SEP>Production Installation"
+  },
+  "Chart Values<SEP>Reports Server": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Chart Values<SEP>Reports Server"
+  },
+  "Immutable Label<SEP>Kyverno Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Immutable Label<SEP>Kyverno Namespace"
+  },
+  "Admission Controller<SEP>Scalability Requirements": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Admission Controller<SEP>Scalability Requirements"
+  },
+  "ArgoCD<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "ArgoCD<SEP>Kyverno"
+  },
+  "Kyverno Rule<SEP>Pod": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kyverno Rule<SEP>Pod"
+  },
+  "Kyverno<SEP>Namespaces": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kyverno<SEP>Namespaces"
+  },
+  "Helm Chart<SEP>Namespace Exclusion": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Helm Chart<SEP>Namespace Exclusion"
+  },
+  "Cluster Outage<SEP>Kyverno Pod": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Cluster Outage<SEP>Kyverno Pod"
+  },
+  "Kubernetes<SEP>ValidatingWebhookConfiguration": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kubernetes<SEP>ValidatingWebhookConfiguration"
+  },
+  "AdmissionReview Request<SEP>Excluded Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "AdmissionReview Request<SEP>Excluded Namespace"
+  },
+  "Label Spoofing<SEP>NamespaceSelector": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Label Spoofing<SEP>NamespaceSelector"
+  },
+  "High Availability Installation<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-001",
+      "https://kyverno.io/docs/installation/installation/-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "High Availability Installation<SEP>Kyverno"
+  },
+  "Kubernetes RBAC<SEP>System Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kubernetes RBAC<SEP>System Namespace"
+  },
+  "Kubernetes<SEP>MutatingWebhookConfiguration": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kubernetes<SEP>MutatingWebhookConfiguration"
+  },
+  "ConfigMap<SEP>ResourceFilter": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "ConfigMap<SEP>ResourceFilter"
+  },
+  "Cluster Administrator<SEP>System Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Cluster Administrator<SEP>System Namespace"
+  },
+  "Kyverno<SEP>Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 2,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kyverno<SEP>Namespace"
+  },
+  "Fail Closed Mode<SEP>Kyverno Rule": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Fail Closed Mode<SEP>Kyverno Rule"
+  },
+  "Label Spoofing<SEP>ObjectSelector": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Label Spoofing<SEP>ObjectSelector"
+  },
+  "Cluster Inoperability<SEP>Namespace Exclusion": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Cluster Inoperability<SEP>Namespace Exclusion"
+  },
+  "Cordoning and Draining<SEP>Node Scaling": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Cordoning and Draining<SEP>Node Scaling"
+  },
+  "Manual Recovery<SEP>ValidatingWebhookConfiguration Deletion": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Manual Recovery<SEP>ValidatingWebhookConfiguration Deletion"
+  },
+  "Operability<SEP>Security by Default": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Operability<SEP>Security by Default"
+  },
+  "Kyverno<SEP>ValidatingWebhookConfiguration": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 2,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Kyverno<SEP>ValidatingWebhookConfiguration"
+  },
+  "Excluded Namespace<SEP>Kyverno Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Excluded Namespace<SEP>Kyverno Policy"
+  },
+  "Helm Chart Version 2.5.0<SEP>Installation": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Helm Chart Version 2.5.0<SEP>Installation"
+  },
+  "Admission Controller<SEP>Pod": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Admission Controller<SEP>Pod"
+  },
+  "Cluster Administrator<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969148,
+    "update_time": 1786969148,
+    "_id": "Cluster Administrator<SEP>Kyverno"
+  },
+  "Kyverno<SEP>V1.18": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>V1.18"
+  },
+  "V1.18<SEP>V1.19": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "V1.18<SEP>V1.19"
+  },
+  "Kubernetes<SEP>V1.18": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kubernetes<SEP>V1.18"
+  },
+  "Kyverno<SEP>Semantic Versioning": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>Semantic Versioning"
+  },
+  "Main Branch<SEP>Release Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Main Branch<SEP>Release Branch"
+  },
+  "Kyverno<SEP>Kyverno V1.0.0": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>Kyverno V1.0.0"
+  },
+  "Kyverno<SEP>MAJOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>MAJOR Release"
+  },
+  "Kyverno<SEP>MINOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>MINOR Release"
+  },
+  "Critical-to-High Severity CVE<SEP>MINOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Critical-to-High Severity CVE<SEP>MINOR Release"
+  },
+  "Cherry-pick<SEP>Release Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Cherry-pick<SEP>Release Branch"
+  },
+  "Kyverno<SEP>PATCH Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>PATCH Release"
+  },
+  "Kyverno Design Proposal<SEP>MAJOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno Design Proposal<SEP>MAJOR Release"
+  },
+  "Release Milestone<SEP>Weekly Maintainer Meeting": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Release Milestone<SEP>Weekly Maintainer Meeting"
+  },
+  "Patch<SEP>Release Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Patch<SEP>Release Branch"
+  },
+  "Critical Bug Fix<SEP>Patch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Critical Bug Fix<SEP>Patch"
+  },
+  "GitHub Tags<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "GitHub Tags<SEP>Kyverno"
+  },
+  "Critical-to-High Severity CVE<SEP>Patch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Critical-to-High Severity CVE<SEP>Patch"
+  },
+  "MINOR Release<SEP>Medium Severity Vulnerability": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "MINOR Release<SEP>Medium Severity Vulnerability"
+  },
+  "Kyverno<SEP>Release Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>Release Branch"
+  },
+  "Low Severity Vulnerability<SEP>MINOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Low Severity Vulnerability<SEP>MINOR Release"
+  },
+  "Community Patch Support<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Community Patch Support<SEP>Kyverno"
+  },
+  "Features<SEP>MINOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Features<SEP>MINOR Release"
+  },
+  "Commercial Kyverno Distribution<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Commercial Kyverno Distribution<SEP>Kyverno"
+  },
+  "Enhancements<SEP>MINOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Enhancements<SEP>MINOR Release"
+  },
+  "Features<SEP>MAJOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Features<SEP>MAJOR Release"
+  },
+  "Kubernetes Control Plane<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kubernetes Control Plane<SEP>Kyverno"
+  },
+  "API Change<SEP>MAJOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "API Change<SEP>MAJOR Release"
+  },
+  "GitHub Tags<SEP>Release Candidate": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "GitHub Tags<SEP>Release Candidate"
+  },
+  "Bug Fix<SEP>MINOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Bug Fix<SEP>MINOR Release"
+  },
+  "Image Tag<SEP>Release Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Image Tag<SEP>Release Branch"
+  },
+  "Incompatible API Change<SEP>MAJOR Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Incompatible API Change<SEP>MAJOR Release"
+  },
+  "Kyverno<SEP>Release Milestone": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>Release Milestone"
+  },
+  "Patch Release<SEP>Release Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Patch Release<SEP>Release Branch"
+  },
+  "Image Tag<SEP>Main Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Image Tag<SEP>Main Branch"
+  },
+  "Cherry-pick-required Label<SEP>Patch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Cherry-pick-required Label<SEP>Patch"
+  },
+  "Bug Fix<SEP>PATCH Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Bug Fix<SEP>PATCH Release"
+  },
+  "Cherry-pick<SEP>Cherry-pick-completed Label": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Cherry-pick<SEP>Cherry-pick-completed Label"
+  },
+  "Release Planning<SEP>Weekly Maintainer's Meeting": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Release Planning<SEP>Weekly Maintainer's Meeting"
+  },
+  "Critical Issue<SEP>PATCH Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Critical Issue<SEP>PATCH Release"
+  },
+  "Major Feature<SEP>Minor Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Major Feature<SEP>Minor Release"
+  },
+  "Release Cycle<SEP>Release Milestone": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Release Cycle<SEP>Release Milestone"
+  },
+  "Kyverno<SEP>Kyverno Design Proposal": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000",
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 2,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Kyverno<SEP>Kyverno Design Proposal"
+  },
+  "Milestone Label<SEP>Release Branch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Milestone Label<SEP>Release Branch"
+  },
+  "Release Instructions<SEP>Release.md": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Release Instructions<SEP>Release.md"
+  },
+  "Bug Fix<SEP>Minor Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Bug Fix<SEP>Minor Release"
+  },
+  "Issue<SEP>Release Milestone": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Issue<SEP>Release Milestone"
+  },
+  "Enhancement<SEP>Minor Release": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Enhancement<SEP>Minor Release"
+  },
+  "Issue<SEP>Release Cycle": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969308,
+    "update_time": 1786969308,
+    "_id": "Issue<SEP>Release Cycle"
+  },
+  "Dynamic Admission Controller<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Dynamic Admission Controller<SEP>Kyverno"
+  },
+  "Kyverno Policy<SEP>Webhook Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno Policy<SEP>Webhook Controller"
+  },
+  "Kyverno<SEP>Validating Admission Webhook": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno<SEP>Validating Admission Webhook"
+  },
+  "Cert Renewer<SEP>Kubernetes Secret": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Cert Renewer<SEP>Kubernetes Secret"
+  },
+  "Kyverno<SEP>Mutating Admission Webhook": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno<SEP>Mutating Admission Webhook"
+  },
+  "Background Controller<SEP>UpdateRequest": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Background Controller<SEP>UpdateRequest"
+  },
+  "Policy Report<SEP>Report Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Policy Report<SEP>Report Controller"
+  },
+  "Kyverno<SEP>Kyverno Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno<SEP>Kyverno Policy"
+  },
+  "Kustomize<SEP>Mutating Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kustomize<SEP>Mutating Policy"
+  },
+  "Pattern Matching<SEP>Validating Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Pattern Matching<SEP>Validating Policy"
+  },
+  "Engine<SEP>Webhook": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Engine<SEP>Webhook"
+  },
+  "Kyverno<SEP>Policy Report": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001",
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 3,
+    "update_time": 1786969532,
+    "_id": "Kyverno<SEP>Policy Report"
+  },
+  "Mutating Policy<SEP>RFC 6902 JSON Patch": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Mutating Policy<SEP>RFC 6902 JSON Patch"
+  },
+  "Kyverno CLI<SEP>Kyverno Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno CLI<SEP>Kyverno Policy"
+  },
+  "Webhook<SEP>Webhook Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Webhook<SEP>Webhook Controller"
+  },
+  "Kubernetes Resource Manifest<SEP>Kyverno CLI": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kubernetes Resource Manifest<SEP>Kyverno CLI"
+  },
+  "Kyverno Authz<SEP>Kyverno Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno Authz<SEP>Kyverno Policy"
+  },
+  "Kubernetes Event<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kubernetes Event<SEP>Kyverno"
+  },
+  "Kubernetes API Server<SEP>Webhook": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kubernetes API Server<SEP>Webhook"
+  },
+  "Kyverno CLI<SEP>Terraform JSON Plan": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno CLI<SEP>Terraform JSON Plan"
+  },
+  "Kyverno<SEP>Kyverno SDK": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno<SEP>Kyverno SDK"
+  },
+  "Kyverno Policy<SEP>Resource Kind": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno Policy<SEP>Resource Kind"
+  },
+  "Envoy<SEP>Kyverno Authz": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Envoy<SEP>Kyverno Authz"
+  },
+  "Mutating Policy<SEP>Overlay": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Mutating Policy<SEP>Overlay"
+  },
+  "Dockerfile<SEP>Kyverno CLI": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Dockerfile<SEP>Kyverno CLI"
+  },
+  "Background Controller<SEP>Generate Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Background Controller<SEP>Generate Policy"
+  },
+  "Kyverno<SEP>Runtime Scan": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno<SEP>Runtime Scan"
+  },
+  "Conditional Processing<SEP>Validating Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Conditional Processing<SEP>Validating Policy"
+  },
+  "Kyverno Policy<SEP>Label Selector": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno Policy<SEP>Label Selector"
+  },
+  "Overlay<SEP>Validating Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Overlay<SEP>Validating Policy"
+  },
+  "HTTP Payload<SEP>Kyverno Authz": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "HTTP Payload<SEP>Kyverno Authz"
+  },
+  "Background Controller<SEP>Mutate-Existing Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Background Controller<SEP>Mutate-Existing Policy"
+  },
+  "Kyverno<SEP>Multiple Replicas": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno<SEP>Multiple Replicas"
+  },
+  "Webhook Configuration<SEP>Webhook Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Webhook Configuration<SEP>Webhook Controller"
+  },
+  "Kyverno Authz<SEP>Sidecar Container": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Kyverno Authz<SEP>Sidecar Container"
+  },
+  "Central Service<SEP>Kyverno Authz": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969425,
+    "update_time": 1786969425,
+    "_id": "Central Service<SEP>Kyverno Authz"
+  },
+  "Deny Action<SEP>ValidatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Deny Action<SEP>ValidatingPolicy"
+  },
+  "Pod<SEP>Require-labels Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Pod<SEP>Require-labels Policy"
+  },
+  "Deployment<SEP>Require-labels Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Deployment<SEP>Require-labels Policy"
+  },
+  "Pod<SEP>Rule Auto-generation": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Pod<SEP>Rule Auto-generation"
+  },
+  "Kyverno<SEP>Validate Resources": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno<SEP>Validate Resources"
+  },
+  "Namespace<SEP>Policy Report": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Namespace<SEP>Policy Report"
+  },
+  "Admission Webhook<SEP>Require-labels Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Admission Webhook<SEP>Require-labels Policy"
+  },
+  "Label<SEP>Pod": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Label<SEP>Pod"
+  },
+  "ValidatingPolicy<SEP>ValidationActions Field": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "ValidatingPolicy<SEP>ValidationActions Field"
+  },
+  "MatchConstraints<SEP>ValidatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "MatchConstraints<SEP>ValidatingPolicy"
+  },
+  "Installation Page<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Installation Page<SEP>Kyverno"
+  },
+  "ValidatingPolicy<SEP>Validation Rule": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "ValidatingPolicy<SEP>Validation Rule"
+  },
+  "Event<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Event<SEP>Kyverno"
+  },
+  "MatchConstraints<SEP>ResourceRules": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "MatchConstraints<SEP>ResourceRules"
+  },
+  "Team Label<SEP>Validation Rule": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Team Label<SEP>Validation Rule"
+  },
+  "API Groups<SEP>ResourceRules": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "API Groups<SEP>ResourceRules"
+  },
+  "Kyverno<SEP>Mutation": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000",
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno<SEP>Mutation"
+  },
+  "Require-labels Policy<SEP>Team Label": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Require-labels Policy<SEP>Team Label"
+  },
+  "Deployment<SEP>Nginx Image": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Deployment<SEP>Nginx Image"
+  },
+  "Generation<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000",
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Generation<SEP>Kyverno"
+  },
+  "Add-Labels Policy<SEP>Team Label": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Add-Labels Policy<SEP>Team Label"
+  },
+  "Cleanup<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000",
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 2,
+    "update_time": 1786969672,
+    "_id": "Cleanup<SEP>Kyverno"
+  },
+  "Add-Labels Policy<SEP>Pod": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Add-Labels Policy<SEP>Pod"
+  },
+  "Redis Pod<SEP>Team Label": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Redis Pod<SEP>Team Label"
+  },
+  "Image Verification<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Image Verification<SEP>Kyverno"
+  },
+  "Newredis Pod<SEP>Team Label": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Newredis Pod<SEP>Team Label"
+  },
+  "Pod<SEP>ValidatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Pod<SEP>ValidatingPolicy"
+  },
+  "Kyverno<SEP>System Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000"
+    ],
+    "count": 2,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno<SEP>System Namespace"
+  },
+  "Pod<SEP>Require-Labels Policy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Pod<SEP>Require-Labels Policy"
+  },
+  "Kyverno Background Controller<SEP>Regcred Secret": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno Background Controller<SEP>Regcred Secret"
+  },
+  "Kyverno<SEP>ValidatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno<SEP>ValidatingPolicy"
+  },
+  "ClusterRole<SEP>Kyverno Background Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "ClusterRole<SEP>Kyverno Background Controller"
+  },
+  "Add-Labels Policy<SEP>Match Constraints": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Add-Labels Policy<SEP>Match Constraints"
+  },
+  "ClusterRole<SEP>Kyverno Admission Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "ClusterRole<SEP>Kyverno Admission Controller"
+  },
+  "Kyverno<SEP>MutatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno<SEP>MutatingPolicy"
+  },
+  "Add-Labels Policy<SEP>Match Conditions": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Add-Labels Policy<SEP>Match Conditions"
+  },
+  "Generate Rule<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Generate Rule<SEP>Kyverno"
+  },
+  "Add-Labels Policy<SEP>Apply Configuration": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Add-Labels Policy<SEP>Apply Configuration"
+  },
+  "Docker Registry<SEP>Regcred Secret": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Docker Registry<SEP>Regcred Secret"
+  },
+  "ClusterRole<SEP>Reports Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "ClusterRole<SEP>Reports Controller"
+  },
+  "CEL Expression<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "CEL Expression<SEP>Kyverno"
+  },
+  "Generate Rule<SEP>Image Pull Secret": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Generate Rule<SEP>Image Pull Secret"
+  },
+  "Match Constraints<SEP>ValidatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Match Constraints<SEP>ValidatingPolicy"
+  },
+  "Match Conditions<SEP>MutatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Match Conditions<SEP>MutatingPolicy"
+  },
+  "Secret<SEP>Sync-secrets": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Secret<SEP>Sync-secrets"
+  },
+  "Generate Rule<SEP>Namespace": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Generate Rule<SEP>Namespace"
+  },
+  "Default Namespace<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Default Namespace<SEP>Kyverno"
+  },
+  "Default<SEP>Regcred": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Default<SEP>Regcred"
+  },
+  "Match Constraints<SEP>MutatingPolicy": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Match Constraints<SEP>MutatingPolicy"
+  },
+  "Kyverno:secrets:view<SEP>Secret": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 2,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno:secrets:view<SEP>Secret"
+  },
+  "Namespace<SEP>Sync-secrets": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Namespace<SEP>Sync-secrets"
+  },
+  "Regcred<SEP>Synchronize": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Regcred<SEP>Synchronize"
+  },
+  "GeneratingPolicy<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001"
+    ],
+    "count": 2,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "GeneratingPolicy<SEP>Kyverno"
+  },
+  "Admission Controller<SEP>Kyverno:secrets:view": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Admission Controller<SEP>Kyverno:secrets:view"
+  },
+  "Kyverno:secrets:manage<SEP>Secret": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno:secrets:manage<SEP>Secret"
+  },
+  "CREATE Operation<SEP>Sync-secrets": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "CREATE Operation<SEP>Sync-secrets"
+  },
+  "Mytestns<SEP>Regcred": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Mytestns<SEP>Regcred"
+  },
+  "Kyverno:secrets:view<SEP>Reports Controller": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Kyverno:secrets:view<SEP>Reports Controller"
+  },
+  "Resource.Get<SEP>Sync-secrets": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Resource.Get<SEP>Sync-secrets"
+  },
+  "Mytestns<SEP>Object.metadata.name": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Mytestns<SEP>Object.metadata.name"
+  },
+  "Background Controller<SEP>Kyverno:secrets:view": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Background Controller<SEP>Kyverno:secrets:view"
+  },
+  "Match Constraints<SEP>Sync-secrets": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Match Constraints<SEP>Sync-secrets"
+  },
+  "Regcred<SEP>Resource.Get": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Regcred<SEP>Resource.Get"
+  },
+  "Background Controller<SEP>Kyverno:secrets:manage": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Background Controller<SEP>Kyverno:secrets:manage"
+  },
+  "Sync-secrets<SEP>Variables": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Sync-secrets<SEP>Variables"
+  },
+  "Generate Rules<SEP>Sync-secrets": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ],
+    "count": 1,
+    "create_time": 1786969532,
+    "update_time": 1786969532,
+    "_id": "Generate Rules<SEP>Sync-secrets"
+  },
+  "Kyverno<SEP>Policy Management": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>Policy Management"
+  },
+  "Kyverno<SEP>YAML": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>YAML"
+  },
+  "CEL<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "CEL<SEP>Kyverno"
+  },
+  "Kubernetes Admission Controller<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kubernetes Admission Controller<SEP>Kyverno"
+  },
+  "CLI-based Scanner<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "CLI-based Scanner<SEP>Kyverno"
+  },
+  "Application Teams<SEP>Platform Engineers": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Application Teams<SEP>Platform Engineers"
+  },
+  "Kubernetes<SEP>Policy Management": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kubernetes<SEP>Policy Management"
+  },
+  "Kyverno<SEP>OpenReport": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>OpenReport"
+  },
+  "Container Images<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Container Images<SEP>Kyverno"
+  },
+  "Developers<SEP>Kubernetes": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Developers<SEP>Kubernetes"
+  },
+  "Kyverno<SEP>Terraform": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>Terraform"
+  },
+  "Kubernetes<SEP>Operations": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kubernetes<SEP>Operations"
+  },
+  "Git<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Git<SEP>Kyverno"
+  },
+  "Kustomize<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kustomize<SEP>Kyverno"
+  },
+  "Kyverno<SEP>Platform Engineers": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>Platform Engineers"
+  },
+  "Kyverno<SEP>Validate": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>Validate"
+  },
+  "Kyverno<SEP>Mutate": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>Mutate"
+  },
+  "Generate<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Generate<SEP>Kyverno"
+  },
+  "JSON Payload<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "JSON Payload<SEP>Kyverno"
+  },
+  "Kyverno<SEP>Unit Testing": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "Kyverno<SEP>Unit Testing"
+  },
+  "End-to-End Testing<SEP>Kyverno": {
+    "chunk_ids": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ],
+    "count": 1,
+    "create_time": 1786969672,
+    "update_time": 1786969672,
+    "_id": "End-to-End Testing<SEP>Kyverno"
+  }
+}

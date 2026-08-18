@@ -16,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -24,6 +25,18 @@ from dotenv import load_dotenv
 # (github_auth, runtime) — otherwise .env-only vars are invisible to them.
 load_dotenv()
 
+# aiohttp (used by voyageai's AsyncClient, which both src/tools/doc_retriever.py
+# and src/memory.py's Graphiti embedder go through) builds its own SSL context
+# from Python's OpenSSL trust store rather than falling back to `certifi` the
+# way `requests`/`httpx` do — on a python.org-installed Python that store is
+# often empty, so every async Voyage embedding call fails with a
+# ClientConnectorCertificateError ("unable to get local issuer certificate")
+# until this is set. Confirmed live, not a guess — see docs/TESTING.md's Tier
+# 5 troubleshooting note. Harmless if the system store is already populated.
+import certifi  # noqa: E402
+
+os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request  # noqa: E402
 from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from loguru import logger  # noqa: E402
@@ -31,7 +44,7 @@ from loguru import logger  # noqa: E402
 from src.app_logging import setup_logging  # noqa: E402
 from src.audit import entry_to_dict
 from src.events import EVENT_HANDLERS, Event, dispatch
-from src.runtime import get_audit_writer, get_client, get_target_repo
+from src.runtime import get_audit_writer, get_client, get_memory_client, get_target_repo
 from src.slack_app import get_bolt_app
 
 # Side-effect imports: populate EVENT_HANDLERS. Several modules can (and do)
@@ -48,7 +61,26 @@ from src.tools.github_tools import set_repo_variable  # noqa: E402
 
 setup_logging()
 
-app = FastAPI(title="kyctrl — Kyverno AI Maintainer Assistant")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: idempotent schema setup — same role `SQLModel.metadata.create_all`
+    # plays in `audit.get_engine`. `get_memory_client()` already returns
+    # `None` when `memory.enabled` is `false` (the default) or Neo4j env
+    # vars are unset, so this is a no-op in the common case.
+    memory = get_memory_client()
+    if memory is not None:
+        await memory.build_indices_and_constraints()
+        logger.info("Graphiti memory: indices/constraints ready")
+
+    yield
+
+    # Shutdown
+    if memory is not None:
+        await memory.close()
+
+
+app = FastAPI(title="kyctrl — Kyverno AI Maintainer Assistant", lifespan=lifespan)
 
 _slack_handler = None
 _bolt_app = get_bolt_app()

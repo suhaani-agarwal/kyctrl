@@ -17,21 +17,27 @@ said "merge", and never includes a generic `add_label` at all.
 
 from __future__ import annotations
 
+import json
+
 from claude_agent_sdk import ClaudeAgentOptions, SandboxNetworkConfig, SandboxSettings, query
 from github import GithubException
 from loguru import logger
 
+from src.agents._shared import memory_search, memory_write
 from src.agents.merge_policy import evaluate
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
 from src.events import Event, register_handler
+from src.memory import build_memory_tool_server
 from src.runtime import (
     can_use_tool,
     get_audit_writer,
     get_client,
     get_config,
+    get_memory_client,
     get_repo_variable,
     get_target_repo,
+    rate_limit_exceeded,
     single_turn_prompt,
 )
 from src.skills import load_skill
@@ -68,6 +74,18 @@ async def handle_dependabot_pr(pr_number: int, external_id: str) -> AuditEntry:
             action_result="skipped: workflow disabled",
         )
 
+    if rate_limit_exceeded(config, WORKFLOW):
+        limit = config.rate_limits.get(WORKFLOW)
+        return audit.write(
+            trigger_event="pull_request",
+            external_id=external_id,
+            workflow_name=WORKFLOW,
+            agent_decision="skipped",
+            decision_reason=f"rate limit exceeded ({limit}/hour)",
+            action_taken="none",
+            action_result="skipped: rate limit exceeded",
+        )
+
     repo_full_name = get_target_repo()
     gh = get_client()
     repo = gh.get_repo(repo_full_name)
@@ -97,9 +115,19 @@ async def handle_dependabot_pr(pr_number: int, external_id: str) -> AuditEntry:
     tool_server = build_pr_tool_server(gh, repo_full_name, pr_number, allow_merge=decision.decision == "merge")
     skill = load_skill("dependabot-policy")
 
+    # Dimension 3 — prefetch relevant memory (no-ops to [] if memory's
+    # disabled/unreachable) and, only when it's actually available, offer
+    # `search_memory` as a tool too — same "capability doesn't exist when
+    # not applicable" pattern `allow_merge` already uses for the merge tool.
+    memory = get_memory_client()
+    memory_facts = await memory_search(f"dependency bump: {pr.title}")
+    mcp_servers = {"github": tool_server}
+    if memory is not None:
+        mcp_servers["memory"] = build_memory_tool_server(memory, default_limit=config.memory.search_top_k)
+
     options = ClaudeAgentOptions(
         system_prompt=skill,
-        mcp_servers={"github": tool_server},
+        mcp_servers=mcp_servers,
         # No built-in tools (Bash/Read/Write/...) and no `allowed_tools`
         # entries — an `allowed_tools` entry with no `(...)` specifier
         # auto-approves the tool *before* `can_use_tool` is consulted,
@@ -122,6 +150,8 @@ async def handle_dependabot_pr(pr_number: int, external_id: str) -> AuditEntry:
         f"The deterministic policy engine already evaluated PR #{pr_number} "
         f"({pr.title!r}) and decided: **{decision.decision}** (rule: `{decision.rule}`). "
         f"Reason: {decision.reason}\n\n"
+        f"Relevant memory (past runs on this or similar dependencies): "
+        f"{memory_facts or 'none found'}\n\n"
         f"If the decision is 'merge': call `approve_and_merge_pr` with a `summary` "
         f"explaining exactly why this is safe, in one or two sentences referencing the "
         f"actual rule that fired. You may call `get_pr_diff` or `get_check_status` first "
@@ -145,6 +175,16 @@ async def handle_dependabot_pr(pr_number: int, external_id: str) -> AuditEntry:
     elif result.is_error:
         action_result = f"failed: {result.subtype}"
 
+    memory_refs = await memory_write(
+        name=f"{repo_full_name}:pr-{pr_number}",
+        episode_body=(
+            f"Dependabot/Renovate PR #{pr_number} ({pr.title!r}): policy decision "
+            f"{decision.decision} (rule={decision.rule}, reason={decision.reason}). "
+            f"Agent action result: {action_result}."
+        ),
+        source_description=WORKFLOW,
+    )
+
     return audit.write(
         trigger_event="pull_request",
         external_id=external_id,
@@ -164,6 +204,7 @@ async def handle_dependabot_pr(pr_number: int, external_id: str) -> AuditEntry:
         ),
         total_cost_usd=result.total_cost_usd if result else None,
         duration_ms=result.duration_ms if result else None,
+        memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
 
 

@@ -17,6 +17,16 @@ Dependency-graph cross-referencing / CVE-database lookups are not built in
 this pass — this agent's job today is: read the report, produce a
 structured private assessment, file it privately. Wiring a real CVE feed is
 a natural next step once this path is proven.
+
+**Deliberately does NOT read or write Dimension 3 (Graphiti) memory**, unlike
+every other agent — see `src/memory.py`'s docstring on why the shared graph
+can't be partitioned per-agent on Neo4j Community edition (no `group_id`
+isolation). `qa_assistant.py` reads that same graph to help compose *public*
+Slack/Discussions answers; a vulnerability episode written here would be
+one `search_memory` call away from leaking into a public answer. The
+audit log already gives this agent's runs a durable record without that
+exposure — see `github_tools.py`'s module docstring on why the dashboard
+itself stays maintainer-only/local.
 """
 
 from __future__ import annotations

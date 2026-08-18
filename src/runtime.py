@@ -8,15 +8,19 @@ from __future__ import annotations
 
 import os
 from collections.abc import AsyncIterator
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 
 from github import Github
+from graphiti_core import Graphiti
 from loguru import logger
+from sqlmodel import Session, func, select
 
 from claude_agent_sdk import PermissionResultAllow, PermissionResultDeny
 
-from src.audit import AuditWriter, get_engine
+from src.audit import AuditEntry, AuditWriter, get_engine
 from src.config import AiMaintainerConfig, kill_switch_engaged, load_config
+from src.memory import build_graphiti_client
 from src.tools.github_auth import GitHubAuth, get_auth_from_env
 
 
@@ -36,6 +40,63 @@ def get_config() -> AiMaintainerConfig:
 @lru_cache
 def get_github_auth() -> GitHubAuth:
     return get_auth_from_env()
+
+
+@lru_cache
+def get_memory_client() -> Graphiti | None:
+    """`None` — not an exception — is the "memory unavailable this run"
+    signal every caller (`src/agents/_shared.py`'s `memory_search`/
+    `memory_write`) checks for, same shape as `get_repo_variable` treating
+    any failure as "unset" rather than raising. Two independent reasons to
+    return `None`: `memory.enabled: false` in config (the default — see
+    `MemoryPolicy`), or `NEO4J_URI`/`NEO4J_PASSWORD` simply not set (a dev
+    environment that never ran `docker compose up neo4j`). `@lru_cache`,
+    not re-read every call like `get_config()` — env vars and the
+    Graphiti/Neo4j connection don't change mid-process the way the kill
+    switch needs to; this mirrors `get_github_auth()`'s tradeoff, not
+    `get_config()`'s. `Graphiti(...)`'s own constructor is synchronous (only
+    `build_indices_and_constraints()`/`add_episode()`/`search()` are async),
+    so `@lru_cache` is safe here — no `doc_retriever.get_rag()`-style manual
+    singleton needed."""
+    if not get_config().memory.enabled:
+        return None
+    uri = os.environ.get("NEO4J_URI")
+    password = os.environ.get("NEO4J_PASSWORD")
+    if not uri or not password:
+        logger.warning("memory.enabled is true but NEO4J_URI/NEO4J_PASSWORD unset — memory disabled this run")
+        return None
+    return build_graphiti_client(uri, os.environ.get("NEO4J_USERNAME", "neo4j"), password)
+
+
+def rate_limit_exceeded(config: AiMaintainerConfig, workflow: str) -> bool:
+    """True if `workflow` has already made >= its configured
+    `rate_limits[workflow]` actions in the trailing hour, per the audit log
+    — the existing AuditWriter/sqlite is the natural source of truth here,
+    since every run already writes one row with `workflow_name` and
+    `timestamp`. No configured limit for a workflow means "don't throttle":
+    absence in `rate_limits` is the safe default, the mirror image of
+    `workflow_enabled`'s "absence means don't run" (that dict's absence has
+    to default to the *safer* direction in each case, and the safer
+    direction is opposite depending on which dict it is). Only counts rows
+    with `action_taken != "none"` — a storm of instant kill-switch/
+    disabled-workflow skips isn't the "runaway behavior" the config's
+    `rate_limits` comment is guarding against (e.g. a webhook replay
+    storm); a storm of real decision attempts is."""
+    limit = config.rate_limits.get(workflow)
+    if limit is None:
+        return False
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
+    with Session(get_audit_writer().engine) as session:
+        count = session.exec(
+            select(func.count())
+            .select_from(AuditEntry)
+            .where(
+                AuditEntry.workflow_name == workflow,
+                AuditEntry.timestamp >= cutoff,
+                AuditEntry.action_taken != "none",
+            )
+        ).one()
+    return count >= limit
 
 
 def get_target_repo() -> str:
@@ -85,6 +146,7 @@ _ALLOWED_TOOL_PREFIXES = (
     "mcp__pattern__",
     "mcp__coach__",
     "mcp__security__",
+    "mcp__memory__",
 )
 
 

@@ -22,8 +22,8 @@ workflows:
   # Dimension 2 (multi-agent system) + Slack/Discussions Q&A — all off by
   # default until their infra (Neo4j, Slack app credentials) is wired up in
   # a given deployment; see README and docs/TESTING.md.
-  qa_assistant: false
-  pattern_agent: false
+  qa_assistant: true
+  pattern_agent: true
   coach_agent: false
   security_agent: false
   reproduction_agent: false
@@ -65,6 +65,12 @@ dependabot:
   # Required GitHub check names that must all be green before merging.
   # Empty list = "all checks reported for the PR must be green".
   required_checks: []
+  # Query OSV.dev (https://osv.dev — free, open source, no API key) for
+  # known vulnerabilities in the exact new version of every dependency in
+  # the PR before merging. Only runs for PRs where Dependabot's commit
+  # trailer parsed (see merge_policy.py's resolve_bump()/parse_pr_dependency_updates()) —
+  # it needs the per-package new version that trailer provides.
+  osv_check_enabled: true
 
 issue_triage:
   # Real Kyverno label taxonomy (see .github/labels.yml and
@@ -124,7 +130,12 @@ qa_assistant:
   # Minimum self-reported confidence required before the agent posts an
   # answer publicly. Below this, it escalates to a maintainer instead of
   # guessing — never lowered casually, this is the "never guess" guarantee.
-  confidence_threshold: high
+  # Temporarily "medium" for local demo/testing (was "high") — a well-cited
+  # medium-confidence answer (e.g. covers concepts/requirements but the
+  # retrieved chunks didn't include literal command syntax) is worth seeing
+  # during testing rather than every borderline case escalating. Raise back
+  # to "high" before any real deployment.
+  confidence_threshold: medium
   max_search_results: 5
   default_kyverno_version: latest
   slack_channels:
@@ -152,3 +163,13 @@ security_agent:
 
 reproduction_agent:
   workflow_file: reproduce-issue.yaml
+
+# Dimension 3 — Graphiti temporal memory. See docs/kyctrl_extra_features.md
+# Dimension 3 and src/memory.py. Off by default, same convention as the
+# Dimension 2 policies above — but "wired up" here is lighter than it looks:
+# this reuses the neo4j service and VOYAGE_API_KEY/ANTHROPIC_API_KEY already
+# required for the Q&A assistant's doc graph, not new infrastructure.
+memory:
+  enabled: true
+  # How many facts a prefetch/search_memory call returns by default.
+  search_top_k: 5

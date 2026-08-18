@@ -28,6 +28,7 @@ Claude (`lightrag.llm.anthropic.anthropic_complete`).
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass
 
 from lightrag import LightRAG, QueryParam
@@ -47,6 +48,24 @@ DOC_METADATA_DB = os.environ.get("DOC_METADATA_DB_PATH", "data/doc_metadata.sqli
 _INDEX_LLM_MODEL = os.environ.get("DOC_INDEX_LLM_MODEL", "claude-haiku-4-5-20251001")
 
 _rag: LightRAG | None = None
+# LightRAG's own `file_path` field is *not* the real URL, despite the
+# `file_paths=[source_url]` we pass to `ainsert()` — confirmed by reading
+# `lightrag.utils_pipeline.normalize_document_file_path`, which explicitly
+# stores only "the canonical basename" of whatever's passed (it's built for
+# real filesystem paths, e.g. "install.md", not URLs). `https://.../install/`
+# collapses to `"install"` there, which would silently produce fake,
+# non-clickable citations if used directly — exactly the failure mode
+# `qa_assistant.py`'s citation guardrail exists to prevent.
+# The real URL survives intact as the prefix of `chunk_id`, which LightRAG
+# builds as `f"{doc_id}-chunk-{order:03d}"` (`utils_pipeline.py`) from the
+# `ids=[source_url]` we pass — this is the stable, load-bearing identifier
+# `build_doc_index.py` actually controls, so this regex recovers the real
+# source_url rather than trusting `file_path`.
+_CHUNK_ID_SUFFIX_RE = re.compile(r"-chunk-\d{3}$")
+
+
+def _source_url_from_chunk_id(chunk_id: str) -> str:
+    return _CHUNK_ID_SUFFIX_RE.sub("", chunk_id)
 
 
 @dataclass
@@ -101,14 +120,16 @@ async def search_docs(query: str, top_k: int = 5, target_version: str | None = N
         return []
 
     raw_chunks = result.get("data", {}).get("chunks", [])
-    chunks = [
-        Chunk(
-            text=c["content"],
-            source_url=c["file_path"],
-            kyverno_version=doc_metadata.get_version(DOC_METADATA_DB, c["file_path"]) or "unversioned",
+    chunks = []
+    for c in raw_chunks:
+        source_url = _source_url_from_chunk_id(c["chunk_id"])
+        chunks.append(
+            Chunk(
+                text=c["content"],
+                source_url=source_url,
+                kyverno_version=doc_metadata.get_version(DOC_METADATA_DB, source_url) or "unversioned",
+            )
         )
-        for c in raw_chunks
-    ]
 
     if target_version:
         version_matched = [c for c in chunks if c.kyverno_version == target_version]

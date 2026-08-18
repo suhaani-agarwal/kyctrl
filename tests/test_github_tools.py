@@ -29,7 +29,7 @@ def _combined_state(statuses: list) -> str:
     return "pending"
 
 
-def make_pr(*, created_minutes_ago=0, labels=(), statuses=(), files=()):
+def make_pr(*, created_minutes_ago=0, labels=(), statuses=(), files=(), commit_messages=()):
     pr = MagicMock()
     pr.created_at = datetime.now(timezone.utc) - timedelta(minutes=created_minutes_ago)
     pr.get_labels.return_value = [SimpleNamespace(name=name) for name in labels]
@@ -42,6 +42,14 @@ def make_pr(*, created_minutes_ago=0, labels=(), statuses=(), files=()):
     pr.get_files.return_value = [
         SimpleNamespace(filename=f["filename"], status=f["status"], additions=1, deletions=0, patch="")
         for f in files
+    ]
+    # `commit_messages`: raw git commit message bodies, used by
+    # merge_policy.parse_pr_dependency_updates() to read Dependabot's
+    # `updated-dependencies` trailer straight off pr.get_commits(). Empty by
+    # default so existing title-only tests are unaffected (no trailer means
+    # merge_policy falls back to title parsing, same as before this existed).
+    pr.get_commits.return_value = [
+        SimpleNamespace(commit=SimpleNamespace(message=msg)) for msg in commit_messages
     ]
     return pr
 

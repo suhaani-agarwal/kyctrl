@@ -29,6 +29,11 @@ class DependabotPolicy(BaseModel):
     hold_label: str = "hold"
     needs_review_label: str = "needs-human-review"
     required_checks: list[str] = Field(default_factory=list)
+    # Off by default — new capability, and shouldn't silently start holding
+    # PRs that merge fine today for repos that upgrade without opting in.
+    # Requires no API key/account (see src/tools/osv_tools.py) so there's
+    # nothing to provision beyond flipping this to true.
+    osv_check_enabled: bool = False
 
     @field_validator("auto_merge")
     @classmethod
@@ -95,6 +100,18 @@ class ReproductionAgentPolicy(BaseModel):
     workflow_file: str = "reproduce-issue.yaml"
 
 
+class MemoryPolicy(BaseModel):
+    # Off by default, same "off until its infra is wired up" convention as
+    # qa_assistant/pattern_agent/etc. — Graphiti reuses the existing Neo4j
+    # service (see src/memory.py), so "wired up" here just means a running
+    # `docker compose up neo4j` plus VOYAGE_API_KEY, not new infra.
+    enabled: bool = False
+    # How many facts src/agents/_shared.py::memory_search fetches per call,
+    # by default — every agent's prefetch-context/search_memory tool use
+    # this unless it passes its own explicit limit.
+    search_top_k: int = 5
+
+
 class AiMaintainerConfig(BaseModel):
     enabled: bool = True
     workflows: dict[str, bool] = Field(default_factory=dict)
@@ -107,6 +124,7 @@ class AiMaintainerConfig(BaseModel):
     coach_agent: CoachAgentPolicy = Field(default_factory=CoachAgentPolicy)
     security_agent: SecurityAgentPolicy = Field(default_factory=SecurityAgentPolicy)
     reproduction_agent: ReproductionAgentPolicy = Field(default_factory=ReproductionAgentPolicy)
+    memory: MemoryPolicy = Field(default_factory=MemoryPolicy)
 
     def workflow_enabled(self, name: str) -> bool:
         """A workflow only runs if both the global switch and its own switch are on."""

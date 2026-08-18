@@ -13,6 +13,10 @@ def patch_runtime(monkeypatch, tmp_path, *, config: AiMaintainerConfig, issue=No
     monkeypatch.setattr("src.agents.issue_triage.get_audit_writer", lambda: writer)
     monkeypatch.setattr("src.agents.issue_triage.get_target_repo", lambda: "suhaani-agarwal/kyctrl-demo-target")
     monkeypatch.setattr("src.agents.issue_triage.get_repo_variable", lambda name: None)
+    # rate_limit_exceeded() lives in src.runtime and resolves get_audit_writer()
+    # from that module's own namespace — see the matching comment in
+    # tests/test_dependabot_agent.py.
+    monkeypatch.setattr("src.runtime.get_audit_writer", lambda: writer)
 
     gh = MagicMock()
     if issue is not None:
@@ -41,6 +45,25 @@ async def test_skips_when_workflow_disabled(monkeypatch, tmp_path):
 
     assert entry.agent_decision == "skipped"
     assert "disabled" in entry.decision_reason
+
+
+@pytest.mark.asyncio
+async def test_skips_when_rate_limit_exceeded(monkeypatch, tmp_path):
+    config = AiMaintainerConfig(enabled=True, workflows={"issue_triage": True}, rate_limits={"issue_triage": 1})
+    writer = patch_runtime(monkeypatch, tmp_path, config=config)
+    writer.write(
+        trigger_event="issues",
+        external_id="gh-issue-0",
+        workflow_name="issue_triage",
+        agent_decision="bug",
+        action_taken="comment_on_issue,transition_issue_state",
+        action_result="success",
+    )
+
+    entry = await handle_issue_event(1, "gh-issue-1")
+
+    assert entry.agent_decision == "skipped"
+    assert "rate limit exceeded" in entry.decision_reason
 
 
 @pytest.mark.asyncio

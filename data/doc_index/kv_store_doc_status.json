@@ -1,0 +1,147 @@
+{
+  "https://kyverno.io/docs/installation/installation/": {
+    "status": "failed",
+    "content_summary": "# Installation\n\nKyverno provides multiple methods for installation: Helm and YAML manifest. When installing in a production environment, Helm is the recommended and most flexible method as it offers convenient configuration options to satisfy a wide ...",
+    "content_length": 14761,
+    "created_at": "2026-08-17T12:18:29.824768+00:00",
+    "updated_at": "2026-08-17T12:21:10.698403+00:00",
+    "file_path": "installation",
+    "track_id": "insert_20260817_174829_fc143b8e",
+    "content_hash": "dfdc9c4cb57314e9f75d0a08b519e94d",
+    "metadata": {
+      "parse_start_time": 1786969109,
+      "parse_stage_skipped": true,
+      "parse_format": "raw",
+      "parse_engine": "legacy",
+      "analyzing_start_time": 1786969109,
+      "analyzing_stage_skipped": true,
+      "kg_write_state": "graph_mutation_started",
+      "process_start_time": 1786969109,
+      "process_end_time": 1786969270,
+      "chunk_method": "legacy_chunking_func",
+      "chunk_opts": "size=1200, split_only=False, overlap=100"
+    },
+    "error_msg": "NanoVectorDBStorage[entities] index flush failed: RetryError[<Future at 0x12d4f1ee0 state=finished raised RateLimitError>]",
+    "chunks_count": 3,
+    "chunks_list": [
+      "https://kyverno.io/docs/installation/installation/-chunk-000",
+      "https://kyverno.io/docs/installation/installation/-chunk-001",
+      "https://kyverno.io/docs/installation/installation/-chunk-002"
+    ]
+  },
+  "https://kyverno.io/docs/installation/releases/": {
+    "status": "failed",
+    "content_summary": "# Releases\n\nKyverno provides approximately three (3) months of community patch support. Patches are strictly limited to fixes for critical bugs and critical-to-high severity CVEs.\n\nPatches are managed in a dedicated release branch (e.g. `release-1.18...",
+    "content_length": 6038,
+    "created_at": "2026-08-17T12:21:10.709219+00:00",
+    "updated_at": "2026-08-17T12:23:17.301326+00:00",
+    "file_path": "releases",
+    "track_id": "insert_20260817_175110_fdb10832",
+    "content_hash": "8f03ab359b9e1008cfa3a0c87b0ca544",
+    "metadata": {
+      "parse_start_time": 1786969270,
+      "parse_stage_skipped": true,
+      "parse_format": "raw",
+      "parse_engine": "legacy",
+      "analyzing_start_time": 1786969270,
+      "analyzing_stage_skipped": true,
+      "kg_write_state": "graph_mutation_started",
+      "process_start_time": 1786969270,
+      "process_end_time": 1786969397,
+      "chunk_method": "legacy_chunking_func",
+      "chunk_opts": "size=1200, split_only=False, overlap=100"
+    },
+    "error_msg": "NanoVectorDBStorage[entities] index flush failed: RetryError[<Future at 0x12d8c92e0 state=finished raised RateLimitError>]",
+    "chunks_count": 2,
+    "chunks_list": [
+      "https://kyverno.io/docs/installation/releases/-chunk-000",
+      "https://kyverno.io/docs/installation/releases/-chunk-001"
+    ]
+  },
+  "https://kyverno.io/docs/introduction/how-kyverno-works/": {
+    "status": "failed",
+    "content_summary": "# How Kyverno Works\n\n## Kubernetes Controllers\n\n[Section titled “Kubernetes Controllers”](#kubernetes-controllers)\n\nKyverno runs as a [dynamic admission controller](/docs/guides/admission-controllers), and other optional controllers, in a Kubernetes ...",
+    "content_length": 3848,
+    "created_at": "2026-08-17T12:23:17.315061+00:00",
+    "updated_at": "2026-08-17T12:25:04.172901+00:00",
+    "file_path": "how-kyverno-works",
+    "track_id": "insert_20260817_175317_b3190483",
+    "content_hash": "83a32b9300b188536eb1dfb88d3c808e",
+    "metadata": {
+      "parse_start_time": 1786969397,
+      "parse_stage_skipped": true,
+      "parse_format": "raw",
+      "parse_engine": "legacy",
+      "analyzing_start_time": 1786969397,
+      "analyzing_stage_skipped": true,
+      "kg_write_state": "graph_mutation_started",
+      "process_start_time": 1786969397,
+      "process_end_time": 1786969504,
+      "chunk_method": "legacy_chunking_func",
+      "chunk_opts": "size=1200, split_only=False, overlap=100"
+    },
+    "error_msg": "NanoVectorDBStorage[entities] index flush failed: RetryError[<Future at 0x12d4f2d80 state=finished raised RateLimitError>]",
+    "chunks_count": 1,
+    "chunks_list": [
+      "https://kyverno.io/docs/introduction/how-kyverno-works/-chunk-000"
+    ]
+  },
+  "https://kyverno.io/docs/introduction/quick-start/": {
+    "status": "failed",
+    "content_summary": "# Kyverno Quick Start\n\nThis section is intended to provide you with some quick guides on how to get Kyverno up and running and demonstrate a few of Kyverno’s seminal features. There are quick start guides which focus on validation, mutation, as well ...",
+    "content_length": 12596,
+    "created_at": "2026-08-17T12:25:04.183781+00:00",
+    "updated_at": "2026-08-17T12:27:31.942277+00:00",
+    "file_path": "quick-start",
+    "track_id": "insert_20260817_175504_623aab02",
+    "content_hash": "3873544c1ee550e8cfa1d356f585e31d",
+    "metadata": {
+      "parse_start_time": 1786969504,
+      "parse_stage_skipped": true,
+      "parse_format": "raw",
+      "parse_engine": "legacy",
+      "analyzing_start_time": 1786969504,
+      "analyzing_stage_skipped": true,
+      "kg_write_state": "graph_mutation_started",
+      "process_start_time": 1786969504,
+      "process_end_time": 1786969651,
+      "chunk_method": "legacy_chunking_func",
+      "chunk_opts": "size=1200, split_only=False, overlap=100"
+    },
+    "error_msg": "NanoVectorDBStorage[entities] index flush failed: RetryError[<Future at 0x12dd80350 state=finished raised RateLimitError>]",
+    "chunks_count": 3,
+    "chunks_list": [
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-000",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-001",
+      "https://kyverno.io/docs/introduction/quick-start/-chunk-002"
+    ]
+  },
+  "https://kyverno.io/docs/introduction/": {
+    "status": "failed",
+    "content_summary": "# Introduction\n\n## What is Policy Management?\n\n[Section titled “What is Policy Management?”](#what-is-policy-management)\n\nIn cloud native systems, policies are configurations that manage other configurations or runtime behaviors.\n\nThe [Kubernetes Pol...",
+    "content_length": 2553,
+    "created_at": "2026-08-17T12:27:31.951935+00:00",
+    "updated_at": "2026-08-17T12:28:44.433992+00:00",
+    "file_path": "introduction",
+    "track_id": "insert_20260817_175731_2b6e796e",
+    "content_hash": "8811ac53a2a4d392ba2dded0056a96ba",
+    "metadata": {
+      "parse_start_time": 1786969651,
+      "parse_stage_skipped": true,
+      "parse_format": "raw",
+      "parse_engine": "legacy",
+      "analyzing_start_time": 1786969651,
+      "analyzing_stage_skipped": true,
+      "kg_write_state": "graph_mutation_started",
+      "process_start_time": 1786969651,
+      "process_end_time": 1786969724,
+      "chunk_method": "legacy_chunking_func",
+      "chunk_opts": "size=1200, split_only=False, overlap=100"
+    },
+    "error_msg": "NanoVectorDBStorage[entities] index flush failed: RetryError[<Future at 0x12da8a8a0 state=finished raised RateLimitError>]",
+    "chunks_count": 1,
+    "chunks_list": [
+      "https://kyverno.io/docs/introduction/-chunk-000"
+    ]
+  }
+}
