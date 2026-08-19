@@ -222,7 +222,7 @@ async def answer_question(
         tools=[],
         allowed_tools=[],
         can_use_tool=can_use_tool,
-        max_turns=6,
+        max_turns=12,
         sandbox=SandboxSettings(
             enabled=True,
             # api.anthropic.com for the agent loop itself; api.voyageai.com
@@ -248,10 +248,24 @@ async def answer_question(
         f"be real search_docs source_urls, never a memory fact."
     )
 
-    result = await stream_agent_run(
-        query(prompt=single_turn_prompt(prompt), options=options),
-        title=f"Q&A Assistant — {source}",
-    )
+    try:
+        result = await stream_agent_run(
+            query(prompt=single_turn_prompt(prompt), options=options),
+            title=f"Q&A Assistant — {source}",
+        )
+    except Exception as e:
+        # The SDK raises (rather than returning an error ResultMessage) when
+        # it hits max_turns — confirmed live: the model had already called
+        # `propose_answer` with a fully-formed, correctly-cited answer, then
+        # made one more tool call that pushed it over the turn limit, and
+        # this exception discarded that answer entirely, crashing the whole
+        # run with nothing posted and nothing audited. `proposal` (populated
+        # by the tool closure, independent of `result`) survives this
+        # regardless — falling through to the same decide_post_or_escalate
+        # call below lets an already-good answer still get posted instead of
+        # thrown away over a turn-count technicality.
+        logger.warning(f"Q&A agent run raised ({e}); falling back to whatever `propose_answer` already captured")
+        result = None
 
     gate_decision, decision_reason = decide_post_or_escalate(proposal, config.qa_assistant.confidence_threshold)
 

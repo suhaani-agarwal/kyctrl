@@ -24,7 +24,7 @@ workflows:
   # a given deployment; see README and docs/TESTING.md.
   qa_assistant: true
   pattern_agent: true
-  coach_agent: false
+  coach_agent: true
   security_agent: false
   reproduction_agent: false
 
@@ -135,7 +135,7 @@ qa_assistant:
   # retrieved chunks didn't include literal command syntax) is worth seeing
   # during testing rather than every borderline case escalating. Raise back
   # to "high" before any real deployment.
-  confidence_threshold: medium
+  confidence_threshold: low
   max_search_results: 5
   default_kyverno_version: latest
   slack_channels:

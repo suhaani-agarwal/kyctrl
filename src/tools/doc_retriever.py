@@ -101,8 +101,19 @@ async def get_rag() -> LightRAG:
 
 async def search_docs(query: str, top_k: int = 5, target_version: str | None = None) -> list[Chunk]:
     """The retrieval layer the Q&A agent's `search_docs` tool calls. Ranking
-    is LightRAG's own hybrid (`mode="mix"`: vector-retrieved chunks plus
-    graph traversal) — a fixed algorithm, not an LLM judgment call.
+    is LightRAG's own algorithm — a fixed formula, not an LLM judgment call —
+    currently `mode="naive"` (plain vector chunk retrieval, ~1 embedding call
+    per search_docs call). This was `mode="mix"` (vector + knowledge-graph
+    entity/relationship traversal), which is a genuinely better ranking but
+    issues several separate Voyage embedding calls per single search_docs
+    call (query, entity vectors, relationship vectors). That's fine against
+    Voyage's standard rate limits; against the *reduced* 3-RPM/10K-TPM limits
+    Voyage applies to accounts with no payment method on file, a single
+    question can exceed the entire per-minute budget by itself, and every
+    call past it fails outright rather than degrading gracefully. `naive`
+    trades away the graph-hybrid ranking to fit inside that cap. Switch back
+    to `mode="mix"` once the account has a payment method on file (still
+    covered by Voyage's free-token tier — this isn't about spend).
 
     When `target_version` is given, this re-ranks/filters to prefer chunks
     tagged with that Kyverno version in the `doc_metadata` side table
@@ -113,7 +124,19 @@ async def search_docs(query: str, top_k: int = 5, target_version: str | None = N
     LightRAG, same reasoning as the citation guardrail in `qa_assistant.py`.
     """
     rag = await get_rag()
-    result = await rag.aquery_data(query, param=QueryParam(mode="mix", top_k=top_k, chunk_top_k=top_k))
+    try:
+        result = await rag.aquery_data(query, param=QueryParam(mode="naive", top_k=top_k, chunk_top_k=top_k))
+    except Exception as e:
+        # A rate-limited/unavailable embedding provider must degrade to "no
+        # results," never crash the calling agent run — same "any failure =
+        # treated as unset" contract src/memory.py already uses for Graphiti.
+        # Without this, one failed call here surfaces as a tool error to the
+        # model, which — per its own instructions to try different phrasings
+        # before giving up — just retries with a new query, each attempt
+        # racing the same exhausted rate limit, until max_turns is reached
+        # with no answer and no clean escalation either (confirmed live).
+        logger.warning(f"search_docs(query={query!r}) failed, returning no results: {e}")
+        return []
 
     if result.get("status") != "success":
         logger.warning(f"search_docs: LightRAG query did not succeed: {result.get('message')}")
