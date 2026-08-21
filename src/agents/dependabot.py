@@ -1,18 +1,13 @@
 """Dependabot/Renovate auto-merge agent.
 
-The merge/hold decision itself is made entirely by `merge_policy.evaluate`
-before this module ever calls the Claude Agent SDK — see that module's
-docstring and kyctrl_extra_features.md Dimension 6. Whether a hold needs
-`needs-human-review` is *also* decided there (`MergeDecision.needs_human_review`)
-and applied directly below, not left to the model — it was flip-flopping
-across otherwise-identical runs when this was phrased as an LLM judgment
-call ("does this genuinely require a human decision?"), which is exactly
-the kind of inconsistency a deterministic rule shouldn't have. This agent's
-only remaining job is to explain the decision in a PR comment, and (only
-when the rule engine already cleared the PR) call the merge tool. The SDK
-is never offered a tool it shouldn't have: `build_pr_tool_server(...,
-allow_merge=)` only includes `approve_and_merge_pr` when the rule engine
-said "merge", and never includes a generic `add_label` at all.
+The merge/hold decision is made entirely by `merge_policy.evaluate` before
+this module ever calls the Claude Agent SDK. Whether a hold needs
+`needs-human-review` is also decided there and applied directly below, not
+left to the model — that judgment call used to flip-flop across
+otherwise-identical runs. This agent's only job is to explain the decision
+in a PR comment and, only when the rule engine already cleared the PR,
+call the merge tool — `build_pr_tool_server(..., allow_merge=)` doesn't
+include `approve_and_merge_pr` at all otherwise.
 """
 
 from __future__ import annotations
@@ -115,10 +110,8 @@ async def handle_dependabot_pr(pr_number: int, external_id: str) -> AuditEntry:
     tool_server = build_pr_tool_server(gh, repo_full_name, pr_number, allow_merge=decision.decision == "merge")
     skill = load_skill("dependabot-policy")
 
-    # Dimension 3 — prefetch relevant memory (no-ops to [] if memory's
-    # disabled/unreachable) and, only when it's actually available, offer
-    # `search_memory` as a tool too — same "capability doesn't exist when
-    # not applicable" pattern `allow_merge` already uses for the merge tool.
+    # Prefetch relevant memory (no-ops to [] if disabled/unreachable), and
+    # only offer `search_memory` as a tool when it's actually available.
     memory = get_memory_client()
     memory_facts = await memory_search(f"dependency bump: {pr.title}")
     mcp_servers = {"github": tool_server}
@@ -128,14 +121,9 @@ async def handle_dependabot_pr(pr_number: int, external_id: str) -> AuditEntry:
     options = ClaudeAgentOptions(
         system_prompt=skill,
         mcp_servers=mcp_servers,
-        # No built-in tools (Bash/Read/Write/...) and no `allowed_tools`
-        # entries — an `allowed_tools` entry with no `(...)` specifier
-        # auto-approves the tool *before* `can_use_tool` is consulted,
-        # which would silently defeat the mid-run kill switch. Leaving
-        # both empty means every tool call (there's only ever the small,
-        # per-PR-scoped set in `tool_server` above) falls through to
-        # `can_use_tool`, which is what actually enforces both "only
-        # AI-Maintainer tools" and "kill switch can interrupt mid-run".
+        # Empty tools/allowed_tools means every call falls through to
+        # can_use_tool (see runtime.py) — the only place the kill switch
+        # and tool allow-list are actually enforced.
         tools=[],
         allowed_tools=[],
         can_use_tool=can_use_tool,
@@ -221,14 +209,11 @@ async def handle(event: Event) -> None:
 
 @register_handler("status")
 async def handle_status(event: Event) -> None:
-    """A `status` webhook fires when CI posts a commit status — see the
-    Statuses-API step in the demo repo's CI workflow, and the comment on
-    `pr_checks_all_green` for why Statuses rather than Checks. This exists
-    because of a real race: the `pull_request` event above usually arrives
-    and gets evaluated *before* CI finishes, so a PR that only turns green
-    after that first evaluation would otherwise never be re-checked and
-    would hold forever. Re-runs the same policy for every open PR whose
-    head is this commit — almost always zero or one PR in practice."""
+    """A `status` webhook fires when CI posts a commit status. Exists
+    because of a real race: the `pull_request` event above usually gets
+    evaluated before CI finishes, so a PR that only turns green afterward
+    would otherwise hold forever. Re-runs the policy for every open PR
+    whose head is this commit (almost always zero or one)."""
     sha = event.payload.get("sha")
     if not sha:
         return

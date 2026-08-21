@@ -151,7 +151,7 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
     issue_tools = build_issue_tool_server(gh, repo_full_name, issue_number)
     skill = load_skill("issue-triage")
 
-    # Dimension 3 — see the matching comment in agents/dependabot.py.
+    # Prefetch relevant memory — see the matching comment in agents/dependabot.py.
     memory = get_memory_client()
     memory_facts = await memory_search(f"issue: {issue.title}")
     mcp_servers = {"github": issue_tools, "state": state_tools}
@@ -161,12 +161,7 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
     options = ClaudeAgentOptions(
         system_prompt=skill,
         mcp_servers=mcp_servers,
-        # See the matching comment in agents/dependabot.py: no built-in
-        # tools, no `allowed_tools` entries — every call to
-        # comment_on_issue/transition_issue_state falls through to
-        # `can_use_tool`, which is what actually enforces the kill switch
-        # and the tool-name allow-list, instead of being shadowed by a
-        # whole-tool `allowed_tools` entry.
+        # See the matching comment in agents/dependabot.py.
         tools=[],
         allowed_tools=[],
         can_use_tool=can_use_tool,
@@ -237,12 +232,9 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
         memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
 
-    # Deterministic handoff to the Reproduction Agent (Dimension 2): only a
-    # complete bug report, never a security-labeled issue (that's
-    # security_agent.py's exclusive concern — see `.github/ai-maintainer.yaml`'s
-    # `issue_triage.exclusion_labels`, which already keeps security issues
-    # out of this function entirely, so the check below is a second,
-    # explicit guard rather than reliance on that alone).
+    # Deterministic handoff to the Reproduction Agent: only a complete bug
+    # report, never security-labeled (a second explicit guard — exclusion_labels
+    # already keeps security issues out of this function entirely).
     if classification == "bug" and not missing and "security" not in labels:
         await trigger_reproduction(issue_number, f"{external_id}-repro", parent_run_id=entry.id)
 

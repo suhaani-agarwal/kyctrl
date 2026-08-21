@@ -21,17 +21,9 @@ from __future__ import annotations
 import os
 from datetime import datetime
 
-# aiohttp (used by voyageai's AsyncClient, which VoyageAIEmbedder below goes
-# through) builds its own SSL context from Python's OpenSSL trust store
-# rather than falling back to `certifi` the way `requests`/`httpx` do — on a
-# python.org-installed Python that store is often empty, so every async
-# Voyage embedding call fails with a ClientConnectorCertificateError
-# ("unable to get local issuer certificate") until this is set. `src/main.py`
-# sets the same thing for the same reason (its own comment already calls out
-# that this module needs it too) — set here as well, not just there, so
-# `src.memory` works whether or not `src.main` was ever imported first (a
-# standalone script per docs/TESTING.md's Tier 8 Step 1, for example).
-# `setdefault` — never overrides a value the environment already set.
+# Same certifi workaround as src/main.py, set here too so this module works
+# standalone (not just when main.py already ran). `setdefault` — never
+# overrides a value the environment already set.
 import certifi  # noqa: E402
 
 os.environ.setdefault("SSL_CERT_FILE", certifi.where())
@@ -48,17 +40,13 @@ from pydantic import BaseModel  # noqa: E402
 
 
 class PassthroughReranker(CrossEncoderClient):
-    """Graphiti's constructor requires *some* cross-encoder, but the basic
-    `graphiti.search()` this module calls runs `EDGE_HYBRID_SEARCH_RRF`
-    (BM25 + cosine similarity + reciprocal-rank-fusion) — it never actually
-    invokes one. Graphiti's own default, `OpenAIRerankerClient`, would both
-    force a third paid provider onto this stack *and* fail at construction
-    time with no `OPENAI_API_KEY` set (the `openai` SDK raises in its own
-    constructor, not lazily) — for a component this integration doesn't
-    exercise. This stub just preserves input order with a descending dummy
-    score, satisfying the interface. Swap it for a real reranker (e.g.
-    `OpenAIRerankerClient` or `GeminiRerankerClient`) if a future pass moves
-    to `graphiti.search_()`'s cross-encoder-reranked recipe instead."""
+    """Graphiti's constructor requires a cross-encoder, but the basic
+    `graphiti.search()` this module uses (BM25 + cosine + RRF) never
+    actually calls one. The real default, `OpenAIRerankerClient`, would
+    force a third paid provider and fail at construction with no
+    `OPENAI_API_KEY` set — so this stub just preserves input order with a
+    descending dummy score. Swap in a real reranker if a future pass moves
+    to Graphiti's cross-encoder-reranked search instead."""
 
     async def rank(self, query: str, passages: list[str]) -> list[tuple[str, float]]:
         n = len(passages)
@@ -67,12 +55,9 @@ class PassthroughReranker(CrossEncoderClient):
 
 # --- Ontology: generic, core-engine-owned, deliberately not Kyverno-specific ---
 #
-# These are what Graphiti's own LLM extraction step (Anthropic) classifies
-# entities/edges into when processing an episode. Kept generic on purpose —
-# nothing here (no `ClusterPolicy`, no Kyverno label names) is
-# project-specific; that's a future skill-pack extension seam, same split
-# labels/exclusion-lists already have between `skills/kyverno/*.md` and
-# core code. See docs/kyctrl_extra_features.md Dimension 3.
+# What Graphiti's LLM extraction step classifies entities/edges into when
+# processing an episode. Kept generic (no Kyverno-specific types) so it
+# stays reusable across projects, same as the skill packs.
 
 
 class Issue(BaseModel):
@@ -133,13 +118,8 @@ def build_graphiti_client(uri: str, user: str, password: str) -> Graphiti:
         uri=uri,
         user=user,
         password=password,
-        # graphiti-core's own AnthropicClient default (no config passed) is
-        # DEFAULT_MODEL = "claude-haiku-4-5-latest" — that alias doesn't
-        # exist on Anthropic's API (only the dated
-        # "claude-haiku-4-5-20251001" does), confirmed live: every
-        # write_episode call was silently failing with a 404 not_found_error
-        # and falling back to "continuing without memory" until this was
-        # set explicitly.
+        # graphiti-core's own default model alias ("claude-haiku-4-5-latest")
+        # doesn't exist on Anthropic's API — pin the dated model explicitly.
         llm_client=AnthropicClient(LLMConfig(model="claude-haiku-4-5-20251001")),
         embedder=VoyageAIEmbedder(VoyageAIEmbedderConfig(api_key=os.environ.get("VOYAGE_API_KEY"))),
         cross_encoder=PassthroughReranker(),
@@ -155,18 +135,12 @@ async def write_episode(
     reference_time: datetime,
 ) -> list[str]:
     """Turns one agent run's outcome into a Graphiti episode. `reference_time`
-    is required with no default here, same as `Graphiti.add_episode`'s own
-    signature (it has none upstream either) — every call site must pass
-    `datetime.now(timezone.utc)` explicitly rather than this function
-    silently inventing a time the caller didn't actually observe.
+    has no default — every call site must pass `datetime.now(timezone.utc)`
+    explicitly rather than this function inventing a time.
 
-    Never raises: a Neo4j hiccup or a rate-limited provider call here must
-    never fail the agent run whose outcome it's trying to remember — same
-    "any failure = treated as unset" reasoning as `get_repo_variable`. Logs
-    and returns `[]` on any failure, which callers feed straight into
-    `AuditEntry.memory_refs` (`None`/`[]` either way means "nothing to
-    reference," never a crash).
-    """
+    Never raises: a Neo4j hiccup or rate-limited provider call must never
+    fail the agent run it's trying to remember. Logs and returns `[]` on
+    any failure."""
     try:
         result = await memory.add_episode(
             name=name,

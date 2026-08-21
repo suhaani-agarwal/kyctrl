@@ -1,28 +1,20 @@
-"""Deterministic-ish retrieval layer for the Q&A assistant, backed by
-LightRAG (`graph_storage="Neo4JStorage"` — the same Neo4j instance as
-`src/graph.py`, `docker-compose.yml`'s `neo4j` service).
+"""Retrieval layer for the Q&A assistant, backed by LightRAG
+(`graph_storage="Neo4JStorage"` — the same Neo4j instance
+`docker-compose.yml`'s `neo4j` service provides).
 
-Honest scope note: LightRAG's Neo4j integration covers *graph* storage
-(entities/relationships) only — as of lightrag-hku 1.5.6 there is no
-Neo4j-backed vector store, so the embedding index LightRAG uses for hybrid
+Scope note: LightRAG's Neo4j integration covers graph storage
+(entities/relationships) only — the embedding index it uses for hybrid
 retrieval still lives in a local file under `working_dir`
-(`NanoVectorDBStorage`, LightRAG's default). The entity/relationship graph
-itself — the part other systems (a future tree-sitter code graph, Graphiti
-memory) could eventually join against — is genuinely in the shared Neo4j
-instance; the vector index is not. Documented here rather than implied by
-the module name.
+(`NanoVectorDBStorage`, LightRAG's default).
 
-`search_docs()` uses `LightRAG.aquery_data()` (structured retrieval,
-*no* LLM generation) rather than `aquery()` (which would have LightRAG
-compose its own answer) — the whole point is that answer composition and
-citation enforcement happen in `qa_assistant.py`'s tool guardrail, in plain
-Python, never silently inside a retrieval call.
+`search_docs()` uses `LightRAG.aquery_data()` (structured retrieval, no LLM
+generation) rather than `aquery()` — answer composition and citation
+enforcement happen in `qa_assistant.py`'s tool guardrail, never silently
+inside a retrieval call.
 
-Embeddings go through Voyage AI (`lightrag.llm.voyageai.voyageai_embed`) —
-Anthropic has no embeddings endpoint of its own; Voyage is Anthropic's own
-recommended embedding partner and a first-class lightrag-hku provider.
-LightRAG's own LLM calls (entity extraction during indexing) go through
-Claude (`lightrag.llm.anthropic.anthropic_complete`).
+Embeddings go through Voyage AI; Anthropic has no embeddings endpoint of
+its own. LightRAG's own LLM calls (entity extraction during indexing) go
+through Claude.
 """
 
 from __future__ import annotations
@@ -48,19 +40,10 @@ DOC_METADATA_DB = os.environ.get("DOC_METADATA_DB_PATH", "data/doc_metadata.sqli
 _INDEX_LLM_MODEL = os.environ.get("DOC_INDEX_LLM_MODEL", "claude-haiku-4-5-20251001")
 
 _rag: LightRAG | None = None
-# LightRAG's own `file_path` field is *not* the real URL, despite the
-# `file_paths=[source_url]` we pass to `ainsert()` — confirmed by reading
-# `lightrag.utils_pipeline.normalize_document_file_path`, which explicitly
-# stores only "the canonical basename" of whatever's passed (it's built for
-# real filesystem paths, e.g. "install.md", not URLs). `https://.../install/`
-# collapses to `"install"` there, which would silently produce fake,
-# non-clickable citations if used directly — exactly the failure mode
-# `qa_assistant.py`'s citation guardrail exists to prevent.
-# The real URL survives intact as the prefix of `chunk_id`, which LightRAG
-# builds as `f"{doc_id}-chunk-{order:03d}"` (`utils_pipeline.py`) from the
-# `ids=[source_url]` we pass — this is the stable, load-bearing identifier
-# `build_doc_index.py` actually controls, so this regex recovers the real
-# source_url rather than trusting `file_path`.
+# LightRAG's own `file_path` field collapses a URL to just its basename, so
+# it can't be trusted as the real source URL. The URL survives intact as
+# the prefix of `chunk_id` (`f"{doc_id}-chunk-{order:03d}"`, built from the
+# `ids=[source_url]` passed at index time), so this regex recovers it instead.
 _CHUNK_ID_SUFFIX_RE = re.compile(r"-chunk-\d{3}$")
 
 

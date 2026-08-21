@@ -1,13 +1,11 @@
 """Deterministic rule engine for the Dependabot/Renovate merge decision.
 
-Per kyctrl_extra_features.md Dimension 6: "Whether to merge a Dependabot PR
-is NOT a judgment call — it's a policy check." This module is pure Python,
-has no LLM involvement, and is the *only* thing that decides merge/hold.
-`agents/dependabot.py` calls `evaluate()` first; the Claude Agent SDK is
-only ever used afterward, to explain the decision in a PR comment and to
-handle the "unknown" case (title didn't parse) as a genuinely ambiguous
-situation worth a second look — never to overturn a merge/hold that this
-module already reached deterministically.
+Whether to merge a PR is a policy check, not a judgment call — this module
+is pure Python, no LLM involvement, and the only thing that decides
+merge/hold. `agents/dependabot.py` calls `evaluate()` first; the Claude
+Agent SDK only explains the decision afterward and handles genuinely
+ambiguous cases (an unparseable title) — it never overturns a decision
+already reached here.
 """
 
 from __future__ import annotations
@@ -28,20 +26,15 @@ _GROUP_TITLE_RE = re.compile(r"bump\s+the\s+(?P<group>[\w-]+)\s+group", re.I)
 _VERSION_RE = re.compile(r"v?(\d+)\.(\d+)\.(\d+)")
 
 # Dependabot embeds a structured `updated-dependencies` YAML block as a git
-# trailer in every commit it authors — the same ground truth the
-# `dependabot/fetch-metadata` GitHub Action reads and re-exposes as PR
-# labels/outputs. Reading it directly here means merge_policy.py never
-# needs that Action (or a label-stamping workflow racing this service's own
-# webhook) to get exact per-package semver/dependency-type data, including
-# for grouped PRs — see resolve_bump()/group_bump_type() below, and
-# parse_bump_title()'s docstring for why that function still exists as a
-# fallback. Terminated by a bare "..." YAML end-of-document marker, not
-# end-of-string — a `Signed-off-by:` line always follows it.
+# trailer in every commit it authors. Reading it directly gives exact
+# per-package semver/dependency-type data, including for grouped PRs,
+# without depending on the `fetch-metadata` Action. Terminated by a bare
+# "..." YAML end marker, not end-of-string — a `Signed-off-by:` line
+# always follows it.
 _TRAILER_RE = re.compile(r"^---\nupdated-dependencies:\n(?P<body>.*?)\n\.\.\.\s*$", re.S | re.M)
-# The "Bumps X from A to B." / "Updates `X` from A to B" prose line(s) in the
-# same commit message — the trailer's `update-type` doesn't carry old/new
-# version numbers, only the bump *kind*, so this is the one extra thing we
-# need from the message body to know what version is actually being merged.
+# The trailer's `update-type` only carries the bump *kind*, not old/new
+# version numbers — this prose line ("Bumps X from A to B.") is the one
+# extra thing needed from the message body for that.
 _BUMPS_LINE_RE = re.compile(
     r"(?:Bumps?|Updates?)\s+`?(?P<name>[\w./@-]+)`?\s+from\s+(?P<old>\S+)\s+to\s+(?P<new>\S+)", re.I
 )
@@ -88,14 +81,11 @@ def semver_bump_type(old: str, new: str) -> str:
 
 
 def parse_bump_title(title: str) -> tuple[str, str]:
-    """Returns (package_or_group_name, bump_type), by regex on the PR
-    **title** alone. This is the fallback path — resolve_bump() below
-    prefers the structured commit trailer and only falls through to this
-    when no commit on the PR has one (e.g. Renovate, which doesn't write
-    Dependabot's trailer format). bump_type is "unknown" when the title
-    doesn't give us enough to compute one deterministically — a grouped
-    bump has no single from/to in its title, so it's always "unknown" here
-    (see group_bump_type() for how a grouped trailer actually resolves this)."""
+    """Returns (package_or_group_name, bump_type) by regex on the PR title
+    alone — the fallback path when no commit has a parseable trailer (e.g.
+    Renovate, which doesn't write Dependabot's trailer format). A grouped
+    bump has no single from/to in its title, so bump_type is always
+    "unknown" here (see group_bump_type() for the trailer-based version)."""
     m = _BUMP_TITLE_RE.search(title)
     if m:
         return m.group("package"), semver_bump_type(m.group("old"), m.group("new"))
