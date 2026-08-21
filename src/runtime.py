@@ -30,10 +30,8 @@ def get_audit_writer() -> AuditWriter:
 
 
 def get_config() -> AiMaintainerConfig:
-    """Deliberately NOT cached — §5.4/§Hard-Constraints: config is read
-    remotely at the start of every run, never stale. In this prototype
-    "remotely" is a local file (or, once deployed, the same file fetched
-    from the repo via the GitHub API); either way, every call re-reads."""
+    """Deliberately NOT cached — config must be read fresh at the start of
+    every run so a policy edit takes effect immediately, no redeploy."""
     return load_config(os.environ.get("AI_MAINTAINER_CONFIG_PATH", ".github/ai-maintainer.yaml"))
 
 
@@ -44,20 +42,10 @@ def get_github_auth() -> GitHubAuth:
 
 @lru_cache
 def get_memory_client() -> Graphiti | None:
-    """`None` — not an exception — is the "memory unavailable this run"
-    signal every caller (`src/agents/_shared.py`'s `memory_search`/
-    `memory_write`) checks for, same shape as `get_repo_variable` treating
-    any failure as "unset" rather than raising. Two independent reasons to
-    return `None`: `memory.enabled: false` in config (the default — see
-    `MemoryPolicy`), or `NEO4J_URI`/`NEO4J_PASSWORD` simply not set (a dev
-    environment that never ran `docker compose up neo4j`). `@lru_cache`,
-    not re-read every call like `get_config()` — env vars and the
-    Graphiti/Neo4j connection don't change mid-process the way the kill
-    switch needs to; this mirrors `get_github_auth()`'s tradeoff, not
-    `get_config()`'s. `Graphiti(...)`'s own constructor is synchronous (only
-    `build_indices_and_constraints()`/`add_episode()`/`search()` are async),
-    so `@lru_cache` is safe here — no `doc_retriever.get_rag()`-style manual
-    singleton needed."""
+    """`None` (never an exception) is the "memory unavailable this run"
+    signal callers check for — either `memory.enabled` is false, or
+    `NEO4J_URI`/`NEO4J_PASSWORD` aren't set. Cached like `get_github_auth()`:
+    the connection doesn't change mid-process the way the kill switch does."""
     if not get_config().memory.enabled:
         return None
     uri = os.environ.get("NEO4J_URI")
@@ -69,19 +57,11 @@ def get_memory_client() -> Graphiti | None:
 
 
 def rate_limit_exceeded(config: AiMaintainerConfig, workflow: str) -> bool:
-    """True if `workflow` has already made >= its configured
-    `rate_limits[workflow]` actions in the trailing hour, per the audit log
-    — the existing AuditWriter/sqlite is the natural source of truth here,
-    since every run already writes one row with `workflow_name` and
-    `timestamp`. No configured limit for a workflow means "don't throttle":
-    absence in `rate_limits` is the safe default, the mirror image of
-    `workflow_enabled`'s "absence means don't run" (that dict's absence has
-    to default to the *safer* direction in each case, and the safer
-    direction is opposite depending on which dict it is). Only counts rows
-    with `action_taken != "none"` — a storm of instant kill-switch/
-    disabled-workflow skips isn't the "runaway behavior" the config's
-    `rate_limits` comment is guarding against (e.g. a webhook replay
-    storm); a storm of real decision attempts is."""
+    """True if `workflow` has already made >= its configured rate limit of
+    actions in the trailing hour, per the audit log. No configured limit
+    means don't throttle. Only counts real actions (`action_taken != "none"`)
+    — a storm of kill-switch/disabled-workflow skips doesn't count as the
+    runaway behavior this guards against."""
     limit = config.rate_limits.get(workflow)
     if limit is None:
         return False
@@ -112,8 +92,8 @@ def get_client() -> Github:
 
 def get_github_token() -> str:
     """Raw bearer token, for the rare caller that needs one directly instead
-    of a `Github` client (currently only `discussion_tools.add_discussion_comment`
-    — GitHub Discussions has no REST API, so PyGithub can't front the call)."""
+    of a `Github` client (GitHub Discussions has no REST API, so PyGithub
+    can't front that call)."""
     return get_github_auth().get_token(get_target_repo())
 
 
@@ -131,14 +111,9 @@ def get_repo_variable(name: str) -> str | None:
 
 
 # The only tool namespaces any agent is ever allowed to call. Every agent
-# sets `tools=[]` (no built-in Bash/Read/Write/WebFetch/...) and leaves
-# `allowed_tools` empty, so *every* tool call — not just the ones an
-# allow-rule doesn't already auto-approve — reaches this callback (an
-# `allowed_tools` entry with no `(...)` specifier auto-approves and skips
-# this callback entirely, which would silently defeat the mid-run kill
-# switch below; see `CanUseToolShadowedWarning`). This function is
-# therefore the *only* place tool access is decided, so it has to enforce
-# both scoping rules itself: kill switch, and "only tools we built."
+# sets `tools=[]` and leaves `allowed_tools` empty so every call reaches
+# `can_use_tool` below — an `allowed_tools` entry would auto-approve and
+# skip this callback, silently defeating the mid-run kill switch.
 _ALLOWED_TOOL_PREFIXES = (
     "mcp__github__",
     "mcp__state__",
@@ -151,14 +126,10 @@ _ALLOWED_TOOL_PREFIXES = (
 
 
 async def can_use_tool(tool_name: str, input_data: dict, context) -> PermissionResultAllow | PermissionResultDeny:
-    """Passed as `ClaudeAgentOptions.can_use_tool` on every agent. Re-reads
-    both kill switches before *every single tool call* — not just at
-    agent start — so flipping `AI_MAINTAINER_ENABLED` mid-run genuinely
-    interrupts the agent instead of only blocking the next one. Also
-    enforces the tool-name allow-list described above, so a model that
-    somehow gets offered an unexpected tool (a built-in, a future MCP
-    server) can't have it rubber-stamped just because the kill switch
-    happens to be off."""
+    """Passed as `ClaudeAgentOptions.can_use_tool` on every agent. Re-checks
+    both kill switches before every tool call (not just at agent start) so
+    flipping the switch mid-run actually interrupts it, and enforces the
+    tool-name allow-list above."""
     config = get_config()
     if kill_switch_engaged(config, get_repo_variable):
         logger.warning(f"can_use_tool: denying {tool_name} — kill switch engaged mid-run")
@@ -174,13 +145,9 @@ async def can_use_tool(tool_name: str, input_data: dict, context) -> PermissionR
 
 
 async def single_turn_prompt(text: str) -> AsyncIterator[dict]:
-    """Every agent sets `can_use_tool` (above), and the installed SDK
-    requires streaming-mode input — an `AsyncIterable[dict]` — whenever
-    `can_use_tool` is set; a plain `str` prompt now raises `ValueError`
-    at run time (see `InternalClient._process_query_inner`). This wraps a
-    single-turn prompt as the one-item async stream the SDK wants, so
-    callers still get `query()`'s stateless one-shot semantics — just
-    with the message shape the SDK requires."""
+    """The SDK requires streaming-mode input (`AsyncIterable[dict]`) whenever
+    `can_use_tool` is set — a plain `str` prompt raises at run time. This
+    wraps a single-turn prompt as the one-item async stream it wants."""
     yield {
         "type": "user",
         "session_id": "",

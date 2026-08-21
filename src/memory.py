@@ -1,36 +1,19 @@
-"""Dimension 3 — Graphiti temporal memory (`docs/kyctrl_extra_features.md`).
+"""Graphiti temporal memory — lets an agent recall past runs, not just log
+them. `write_episode` turns a run's outcome into a timestamped Graphiti
+episode; `search_context` turns a query into the facts most relevant to it.
+`src/agents/_shared.py`'s `memory_search`/`memory_write` are what agents
+actually call; this module owns construction and the two raw operations.
 
-Every agent's final `audit.write(...)` records *what* happened. This module
-is what lets an agent also remember it: `write_episode` turns a run's
-outcome into a Graphiti episode (extracted into typed, timestamped
-nodes/edges), `search_context` turns a query into the facts most relevant
-to it. `src/agents/_shared.py`'s `memory_search`/`memory_write` are the
-actual call sites every agent uses — this module only owns construction and
-the two raw operations, same split `audit.py` has between `AuditWriter` and
-the module-level helpers that use it.
+Shares the same Neo4j instance as `tools/doc_retriever.py`'s LightRAG store
+rather than a separate one — named databases are a Neo4j Enterprise-only
+feature, and Community (what `docker-compose.yml` runs) has just the one
+default database. Every call below uses Graphiti's default group, so its
+node labels (`Entity`, `Episodic`, the custom types below) stay separate
+from LightRAG's schema without a second database. Multi-repo isolation is
+future work.
 
-**Same Neo4j instance as `src/graph.py`/`tools/doc_retriever.py`, on
-purpose, not a new one.** `src/graph.py`'s docstring already commits to
-"kept apart by node labels/namespaces rather than separate databases, per
-the plan" — and that's not just a style choice here, it's load-bearing:
-`Graphiti.add_episode` re-points its driver at a *different Neo4j database*
-whenever `group_id` differs from the driver's current database
-(`graphiti_core/graphiti.py`, verified against the installed 0.29.3 wheel),
-and named databases are a Neo4j **Enterprise** feature — Community (what
-`docker-compose.yml` runs) only has the one default database. So every call
-below uses Graphiti's default group (never passes `group_id`), which keeps
-everything in the same database LightRAG's `Neo4JStorage` already writes
-into. This is safe: Graphiti's own node labels (`Entity`, `Episodic`, and
-the custom types below) don't collide with LightRAG's schema, so "shared
-instance, namespaced apart" falls out for free without any extra work.
-Multi-repo isolation (Enterprise multi-database, or a hand-rolled namespace
-property that doesn't ride `group_id`'s database routing) is future work.
-
-**Providers reuse exactly what `tools/doc_retriever.py` already pays for**:
-Anthropic for the LLM calls Graphiti makes internally to extract entities
-and edges from an episode (`AnthropicClient()` reads `ANTHROPIC_API_KEY`
-itself), Voyage AI for embeddings (`VOYAGE_API_KEY` — Anthropic has no
-embeddings endpoint of its own). No new secrets, no third provider.
+Providers reuse what `doc_retriever.py` already pays for: Anthropic for
+entity/edge extraction, Voyage AI for embeddings. No new secrets.
 """
 
 from __future__ import annotations
