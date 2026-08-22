@@ -12,6 +12,8 @@ exists, is drafting the tracking issue's natural-language summary.
 
 from __future__ import annotations
 
+import json
+
 from claude_agent_sdk import (
     ClaudeAgentOptions,
     SandboxNetworkConfig,
@@ -23,15 +25,18 @@ from claude_agent_sdk import (
 from github import GithubException
 from loguru import logger
 
+from src.agents._shared import memory_search, memory_write
 from src.agents.pattern_clustering import ClusterableIssue, cluster_issues
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
 from src.events import Event, register_handler
+from src.memory import build_memory_tool_server
 from src.runtime import (
     can_use_tool,
     get_audit_writer,
     get_client,
     get_config,
+    get_memory_client,
     get_repo_variable,
     get_target_repo,
     single_turn_prompt,
@@ -131,9 +136,25 @@ async def handle_pattern_run(external_id: str) -> AuditEntry:
         )
 
     tool_server = _build_pattern_tool_server(repo)
+
+    clusters_desc = "\n\n".join(
+        f"Cluster {idx + 1}: " + ", ".join(f"#{i.number} {i.title!r}" for i in cluster)
+        for idx, cluster in enumerate(clusters)
+    )
+
+    # Dimension 3 — see the matching comment in agents/dependabot.py. No
+    # single entity to scope the prefetch query to here (a whole run's
+    # worth of clusters, not one issue/PR), so this prefetches on the
+    # cluster titles as a whole rather than skipping it.
+    memory = get_memory_client()
+    memory_facts = await memory_search(f"issue patterns: {clusters_desc}")
+    mcp_servers = {"pattern": tool_server}
+    if memory is not None:
+        mcp_servers["memory"] = build_memory_tool_server(memory, default_limit=config.memory.search_top_k)
+
     options = ClaudeAgentOptions(
         system_prompt=_SKILL,
-        mcp_servers={"pattern": tool_server},
+        mcp_servers=mcp_servers,
         tools=[],
         allowed_tools=[],
         can_use_tool=can_use_tool,
@@ -144,11 +165,11 @@ async def handle_pattern_run(external_id: str) -> AuditEntry:
         ),
     )
 
-    clusters_desc = "\n\n".join(
-        f"Cluster {idx + 1}: " + ", ".join(f"#{i.number} {i.title!r}" for i in cluster)
-        for idx, cluster in enumerate(clusters)
+    prompt = (
+        f"Deterministically-identified clusters this run:\n\n{clusters_desc}\n\n"
+        f"Relevant memory (past pattern-agent runs): {memory_facts or 'none found'}\n\n"
+        f"File one tracking issue per cluster."
     )
-    prompt = f"Deterministically-identified clusters this run:\n\n{clusters_desc}\n\nFile one tracking issue per cluster."
 
     result = await stream_agent_run(
         query(prompt=single_turn_prompt(prompt), options=options),
@@ -160,6 +181,25 @@ async def handle_pattern_run(external_id: str) -> AuditEntry:
         action_result = "failed: no ResultMessage from agent run"
     elif result.is_error:
         action_result = f"failed: {result.subtype}"
+
+    # One episode per cluster — this is Dimension 3's "Cross-Issue Pattern
+    # Memory" made literal: each cluster's linked issue numbers give
+    # Graphiti's extraction exactly what it needs to write RELATED_TO edges
+    # between those Issue entities, not just a generic run summary.
+    memory_refs: list[str] = []
+    for idx, cluster in enumerate(clusters):
+        issue_numbers = [i.number for i in cluster]
+        refs = await memory_write(
+            name=f"{repo_full_name}:pattern-cluster-{idx}",
+            episode_body=(
+                f"Pattern Agent linked issues {issue_numbers} as a cluster: "
+                f"{', '.join(i.title for i in cluster)}. Filed via file_tracking_issue. "
+                f"Agent action result: {action_result}."
+            ),
+            source_description=WORKFLOW,
+        )
+        if refs:
+            memory_refs.extend(refs)
 
     return audit.write(
         trigger_event="cron",
@@ -174,6 +214,7 @@ async def handle_pattern_run(external_id: str) -> AuditEntry:
         revert_command="close the filed tracking issue(s)",
         total_cost_usd=result.total_cost_usd if result else None,
         duration_ms=result.duration_ms if result else None,
+        memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
 
 

@@ -16,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -24,6 +25,14 @@ from dotenv import load_dotenv
 # (github_auth, runtime) — otherwise .env-only vars are invisible to them.
 load_dotenv()
 
+# aiohttp (used by voyageai's AsyncClient, which the doc retriever and memory
+# embedders go through) doesn't fall back to certifi like requests/httpx do,
+# so on a python.org-installed Python this can 404 with a cert error unless
+# set explicitly. Harmless if the system store is already populated.
+import certifi  # noqa: E402
+
+os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request  # noqa: E402
 from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from loguru import logger  # noqa: E402
@@ -31,7 +40,7 @@ from loguru import logger  # noqa: E402
 from src.app_logging import setup_logging  # noqa: E402
 from src.audit import entry_to_dict
 from src.events import EVENT_HANDLERS, Event, dispatch
-from src.runtime import get_audit_writer, get_client, get_target_repo
+from src.runtime import get_audit_writer, get_client, get_memory_client, get_target_repo
 from src.slack_app import get_bolt_app
 
 # Side-effect imports: populate EVENT_HANDLERS. Several modules can (and do)
@@ -48,7 +57,24 @@ from src.tools.github_tools import set_repo_variable  # noqa: E402
 
 setup_logging()
 
-app = FastAPI(title="kyctrl — Kyverno AI Maintainer Assistant")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # get_memory_client() returns None when memory is disabled or unconfigured,
+    # so this is a no-op in the common case.
+    memory = get_memory_client()
+    if memory is not None:
+        await memory.build_indices_and_constraints()
+        logger.info("Graphiti memory: indices/constraints ready")
+
+    yield
+
+    # Shutdown
+    if memory is not None:
+        await memory.close()
+
+
+app = FastAPI(title="kyctrl — Kyverno AI Maintainer Assistant", lifespan=lifespan)
 
 _slack_handler = None
 _bolt_app = get_bolt_app()
@@ -60,10 +86,9 @@ if _bolt_app is not None:
 
 @app.post("/slack/events")
 async def slack_events(request: Request):
-    """Mounts the Slack Bolt app (see slack_app.py) at a single route — Bolt
-    owns signature verification, the url_verification challenge, and event
-    routing from here; this endpoint exists only when Slack credentials are
-    configured (see get_bolt_app's docstring)."""
+    """Mounts the Slack Bolt app (see slack_app.py) — Bolt owns signature
+    verification and event routing from here. Only registered when Slack
+    credentials are configured."""
     if _slack_handler is None:
         raise HTTPException(status_code=503, detail="Slack integration not configured (SLACK_BOT_TOKEN/SLACK_SIGNING_SECRET unset)")
     return await _slack_handler.handle(request)
@@ -127,12 +152,10 @@ async def webhook(request: Request, background_tasks: BackgroundTasks):
 
 @app.post("/internal/cron/{job}")
 async def cron_trigger(job: str, request: Request, background_tasks: BackgroundTasks):
-    """Ingress for GitHub Actions `schedule:`-triggered jobs (Pattern Agent,
-    doc-index refresh) — see `.github/workflows/pattern-agent-cron.yaml`
-    (the doc-index-refresh equivalent isn't built yet; add it the same way
-    when needed). Not GitHub-HMAC-signed like `/webhook` (these aren't
-    GitHub webhook deliveries), so a separate shared-secret header is the
-    auth mechanism instead."""
+    """Ingress for GitHub Actions `schedule:`-triggered jobs (see
+    `.github/workflows/pattern-agent-cron.yaml`). Not a GitHub webhook
+    delivery, so it's authenticated with a shared-secret header instead of
+    HMAC."""
     secret = os.environ.get("CRON_SECRET")
     if not secret or not hmac.compare_digest(request.headers.get("X-Cron-Secret", ""), secret):
         raise HTTPException(status_code=401, detail="Invalid or missing X-Cron-Secret")

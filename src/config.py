@@ -1,14 +1,12 @@
-"""Type-safe loading of `.github/ai-maintainer.yaml`.
+"""Type-safe loading of `.github/ai-maintainer.yaml`, the single source of
+truth for agent behavior. Every agent run starts by calling `load_config()`
+and `kill_switch_engaged()` — a misconfigured file fails loudly here rather
+than causing silent misbehavior later.
 
-This is the single source of truth for agent behavior (see §5.4 of
-kyctrl_plan.md). Every agent run starts by calling `load_config()` and
-`kill_switch_engaged()` — a misconfigured file fails loudly here instead of
-causing silent misbehavior three layers down.
-
-Two independent kill switches are modeled on purpose:
-  1. `AiMaintainerConfig.enabled` — reviewed, comes from a committed file.
-  2. The `AI_MAINTAINER_ENABLED` GitHub repo variable — instant, no PR
-     needed. It always wins if the two disagree (see `kill_switch_engaged`).
+Two independent kill switches are modeled on purpose: `enabled` in the
+committed config file, and the `AI_MAINTAINER_ENABLED` repo variable
+(instant, no PR needed — wins if the two disagree, see
+`kill_switch_engaged`).
 """
 
 from __future__ import annotations
@@ -29,6 +27,9 @@ class DependabotPolicy(BaseModel):
     hold_label: str = "hold"
     needs_review_label: str = "needs-human-review"
     required_checks: list[str] = Field(default_factory=list)
+    # Off by default so upgrading doesn't silently start holding PRs that
+    # merge fine today. No API key needed (src/tools/osv_tools.py) to enable.
+    osv_check_enabled: bool = False
 
     @field_validator("auto_merge")
     @classmethod
@@ -57,10 +58,8 @@ class QaAssistantEscalation(BaseModel):
 
 
 class QaAssistantPolicy(BaseModel):
-    # Minimum self-reported confidence the agent must clear before an
-    # answer is posted publicly — see qa_assistant.py's confidence gate,
-    # a deterministic check, never the LLM's own call. "high" required by
-    # default: never guess, per the issue's explicit requirement.
+    # Minimum self-reported confidence before an answer is posted publicly —
+    # a deterministic check (qa_assistant.py), never the LLM's own call.
     confidence_threshold: str = "high"
     max_search_results: int = 5
     default_kyverno_version: str = "latest"
@@ -95,6 +94,13 @@ class ReproductionAgentPolicy(BaseModel):
     workflow_file: str = "reproduce-issue.yaml"
 
 
+class MemoryPolicy(BaseModel):
+    # Off by default until its infra (Neo4j + VOYAGE_API_KEY) is wired up.
+    enabled: bool = False
+    # Default number of facts a memory_search call returns (src/agents/_shared.py).
+    search_top_k: int = 5
+
+
 class AiMaintainerConfig(BaseModel):
     enabled: bool = True
     workflows: dict[str, bool] = Field(default_factory=dict)
@@ -107,6 +113,7 @@ class AiMaintainerConfig(BaseModel):
     coach_agent: CoachAgentPolicy = Field(default_factory=CoachAgentPolicy)
     security_agent: SecurityAgentPolicy = Field(default_factory=SecurityAgentPolicy)
     reproduction_agent: ReproductionAgentPolicy = Field(default_factory=ReproductionAgentPolicy)
+    memory: MemoryPolicy = Field(default_factory=MemoryPolicy)
 
     def workflow_enabled(self, name: str) -> bool:
         """A workflow only runs if both the global switch and its own switch are on."""

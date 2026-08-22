@@ -22,3 +22,13 @@ voyageai==0.5.0           # LightRAG's embedding_func (lightrag.llm.voyageai.voy
                            # Anthropic has no embeddings endpoint of its own
 markdownify==1.2.3        # HTML -> markdown for scripts/crawl_docs.py (no browser needed;
                            # kyverno.io is server-rendered — see that script's docstring)
+certifi==2026.7.22         # already a transitive dep (requests/httpx), pinned directly here
+                           # because main.py/build_doc_index.py/src/memory.py now read
+                           # certifi.where() explicitly to fix aiohttp's SSL trust store —
+                           # see the comment next to each os.environ.setdefault("SSL_CERT_FILE", ...) call
+
+# Dimension 3 — Graphiti temporal memory (src/memory.py), on the same Neo4j
+# instance as the doc graph above. No new provider deps: graphiti-core's
+# optional `anthropic`/`voyageai` extras are already satisfied by the
+# anthropic/voyageai pins above, so the plain package is enough here.
+graphiti-core==0.29.3

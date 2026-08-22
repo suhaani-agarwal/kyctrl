@@ -23,12 +23,34 @@ unaffected — same "absence of credentials degrades gracefully" posture as
 
 from __future__ import annotations
 
+import asyncio
 import os
 from functools import lru_cache
 
 from loguru import logger
 
 from src.events import Event, dispatch
+
+# AsyncSlackRequestHandler.handle() (see main.py's /slack/events route)
+# awaits the *entire* Bolt listener chain before returning the HTTP response
+# to Slack — confirmed by reading its source, not assumed. Slack's Events
+# API expects that response within 3 seconds or it retries the same event
+# delivery up to 3 times, each retry re-triggering this same listener. A
+# full Q&A agent turn (several tool calls, several Voyage/Anthropic round
+# trips) routinely takes far longer than that, so `await dispatch(...)`
+# directly here was silently causing 2-3 duplicate full agent runs per
+# question — the real cause of the Voyage rate-limit storms and inflated
+# cost seen in testing, not "one question is expensive." Firing it via
+# `asyncio.create_task` instead lets this listener return immediately after
+# `ack()`, exactly mirroring how main.py's GitHub webhook path already uses
+# `background_tasks.add_task(dispatch, event)` for the same reason.
+
+
+async def _dispatch_in_background(event: Event) -> None:
+    try:
+        await dispatch(event)
+    except Exception:
+        logger.exception(f"Unhandled exception dispatching Slack event {event.type!r} ({event.external_id})")
 
 _SUGGESTED_PROMPTS = [
     "Does Kyverno support mutate policies for Ingress resources?",
@@ -57,14 +79,26 @@ def get_bolt_app():
         if not channel or not thread_ts:
             logger.warning("app_mention event missing channel/ts, skipping")
             return
-        await dispatch(
-            Event(
-                source="slack",
-                type="app_mention",
-                external_id=f"slack-{channel}-{thread_ts}",
-                payload=event,
+        asyncio.create_task(
+            _dispatch_in_background(
+                Event(
+                    source="slack",
+                    type="app_mention",
+                    external_id=f"slack-{channel}-{thread_ts}",
+                    payload=event,
+                )
             )
         )
+
+    # Slack sends a plain `message` event alongside `app_mention` for the
+    # same channel message (and for every other message the bot can see,
+    # e.g. in a DM). We only ever act on `app_mention`/the Assistant thread
+    # listeners below, so this is a deliberate no-op — without it, Bolt logs
+    # its "unhandled event, here's a listener you could add" suggestion for
+    # every single message, which reads like an error but isn't one.
+    @app.event("message")
+    async def handle_message_event(ack) -> None:
+        await ack()
 
     # Slack's native AI Assistant surface — shows up in the AI side panel
     # rather than as a bot posting in an ordinary channel thread.
@@ -82,12 +116,14 @@ def get_bolt_app():
         if not channel or not thread_ts:
             logger.warning("assistant user_message missing channel_id/thread_ts, skipping")
             return
-        await dispatch(
-            Event(
-                source="slack",
-                type="app_mention",
-                external_id=f"slack-assistant-{channel}-{thread_ts}",
-                payload={"text": text, "channel": channel, "thread_ts": thread_ts},
+        asyncio.create_task(
+            _dispatch_in_background(
+                Event(
+                    source="slack",
+                    type="app_mention",
+                    external_id=f"slack-assistant-{channel}-{thread_ts}",
+                    payload={"text": text, "channel": channel, "thread_ts": thread_ts},
+                )
             )
         )
 

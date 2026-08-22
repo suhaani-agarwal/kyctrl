@@ -27,6 +27,16 @@ from loguru import logger
 
 load_dotenv()
 
+# See the matching comment in src/main.py: aiohttp (voyageai's AsyncClient,
+# used here via LightRAG's embedding_func) doesn't fall back to `certifi`
+# like requests/httpx do, so async Voyage calls fail with
+# ClientConnectorCertificateError on a python.org-installed Python until
+# this is set. Confirmed live — see docs/TESTING.md's Tier 5 troubleshooting.
+import certifi  # noqa: E402
+import os  # noqa: E402
+
+os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src.tools import doc_metadata  # noqa: E402
 from src.tools.doc_retriever import DOC_METADATA_DB, get_rag  # noqa: E402
