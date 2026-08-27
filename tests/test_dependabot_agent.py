@@ -22,6 +22,10 @@ def patch_runtime(monkeypatch, tmp_path, *, config: AiMaintainerConfig, pr=None)
     monkeypatch.setattr("src.agents.dependabot.get_audit_writer", lambda: writer)
     monkeypatch.setattr("src.agents.dependabot.get_target_repo", lambda: "suhaani-agarwal/kyctrl-demo-target")
     monkeypatch.setattr("src.agents.dependabot.get_repo_variable", lambda name: None)
+    # rate_limit_exceeded() lives in src.runtime and resolves get_audit_writer()
+    # from that module's own namespace, not dependabot.py's imported copy —
+    # same writer/tmp db either way, just patched at both call sites.
+    monkeypatch.setattr("src.runtime.get_audit_writer", lambda: writer)
 
     gh = MagicMock()
     if pr is not None:
@@ -51,6 +55,28 @@ async def test_skips_when_workflow_disabled(monkeypatch, tmp_path):
 
     assert entry.agent_decision == "skipped"
     assert "disabled" in entry.decision_reason
+
+
+@pytest.mark.asyncio
+async def test_skips_when_rate_limit_exceeded(monkeypatch, tmp_path):
+    config = AiMaintainerConfig(
+        enabled=True, workflows={"dependabot_auto_merge": True}, rate_limits={"dependabot_auto_merge": 1}
+    )
+    writer = patch_runtime(monkeypatch, tmp_path, config=config)
+    writer.write(
+        trigger_event="pull_request",
+        external_id="gh-pr-0",
+        workflow_name="dependabot_auto_merge",
+        agent_decision="merge",
+        action_taken="approve_and_merge_pr",
+        action_result="success",
+    )
+
+    entry = await handle_dependabot_pr(1, "gh-pr-1")
+
+    assert entry.agent_decision == "skipped"
+    assert "rate limit exceeded" in entry.decision_reason
+    assert entry.action_result == "skipped: rate limit exceeded"
 
 
 @pytest.mark.asyncio

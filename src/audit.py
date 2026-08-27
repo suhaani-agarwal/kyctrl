@@ -1,19 +1,14 @@
-"""Append-only audit log — the auditability guarantee from the issue: "a
-maintainer must be able to review a full week of bot activity in under
-five minutes." Every agent action is one row here.
+"""Append-only audit log. Every agent action is one row here, so a
+maintainer can review a full week of bot activity in minutes.
 
-Uses SQLModel (not raw SQLAlchemy): the same `AuditEntry` class is both the
-Pydantic schema and the ORM table, since `config.py` already standardizes
-on Pydantic — one less conceptual layer.
+Uses SQLModel (not raw SQLAlchemy) so the same `AuditEntry` class is both
+the Pydantic schema and the ORM table.
 
-Three columns are unused today on purpose (`parent_run_id`, `overridden_at`
-/`overridden_by`, `memory_refs`) — forward-compatible seams for Dimensions
-2/3/4 of the extra-features roadmap. Adding those features later means
-populating existing nullable columns, not a migration. `memory_refs`
-specifically is reserved for Dimension 3's Graphiti integration (see
-docs/kyctrl_extra_features.md) — the Graphiti node/edge UUIDs an agent's
-`graphiti.add_episode(...)` call returned after this run, not a
-self-reference into this table.
+A few columns are unused today by design (`parent_run_id`, `overridden_at`/
+`overridden_by`, `memory_refs`) — forward-compatible seams for
+subagent hierarchies, maintainer-override tracking, and Graphiti memory
+refs, so those features can populate existing nullable columns later
+instead of needing a migration.
 """
 
 from __future__ import annotations

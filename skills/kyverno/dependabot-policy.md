@@ -71,10 +71,19 @@ which isn't a decision at all, just not-yet-ready.
 ## Grouped-PR nuance
 
 Because of the `kubernetes`/`sigstore`/`otel` groups, a single Dependabot PR
-can bump several modules at once. The rule engine evaluates the **highest**
-semver bump type across the whole group — if one module in a `kubernetes`
-group PR is a minor bump and another is a major bump, the PR is treated as
-major (goes to a human) even though most of the diff is routine.
+can bump several modules at once. `merge_policy.py` reads each commit's
+`updated-dependencies` trailer — the same structured metadata the
+`dependabot/fetch-metadata` GitHub Action re-exposes as PR labels, read here
+directly instead so the decision stays a single synchronous check with no
+separate Action/label step to wait on — to get the exact `update-type` for
+every module in the PR, and evaluates the **highest** semver bump type
+across the whole group — if one module in a `kubernetes` group PR is a minor
+bump and another is a major bump, the PR is treated as major (goes to a
+human) even though most of the diff is routine. Each module is also checked
+against `excluded_packages` individually, so a group bumping both an
+ordinary module and an excluded one (e.g. `k8s.io/api` alongside
+`k8s.io/client-go`) still holds. If a bot's commits don't carry this trailer
+(Renovate doesn't write it), the PR title is parsed instead, best-effort.
 
 ## What the merge comment should look like
 

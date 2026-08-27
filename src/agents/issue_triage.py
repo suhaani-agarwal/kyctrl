@@ -11,6 +11,8 @@ the same policy to the rare ones that slip through anyway.
 
 from __future__ import annotations
 
+import json
+
 from claude_agent_sdk import (
     ClaudeAgentOptions,
     SandboxNetworkConfig,
@@ -22,19 +24,23 @@ from claude_agent_sdk import (
 from github import GithubException
 from loguru import logger
 
+from src.agents._shared import memory_search, memory_write
 from src.agents.issue_fields import missing_bug_fields, uses_webhook_template
 from src.agents.issue_fsm import STATES, state_label, validate_transition
 from src.agents.reproduction import trigger_reproduction
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
 from src.events import Event, register_handler
+from src.memory import build_memory_tool_server
 from src.runtime import (
     can_use_tool,
     get_audit_writer,
     get_client,
     get_config,
+    get_memory_client,
     get_repo_variable,
     get_target_repo,
+    rate_limit_exceeded,
     single_turn_prompt,
 )
 from src.skills import load_skill
@@ -100,6 +106,18 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
             action_result="skipped: workflow disabled",
         )
 
+    if rate_limit_exceeded(config, WORKFLOW):
+        limit = config.rate_limits.get(WORKFLOW)
+        return audit.write(
+            trigger_event="issues",
+            external_id=external_id,
+            workflow_name=WORKFLOW,
+            agent_decision="skipped",
+            decision_reason=f"rate limit exceeded ({limit}/hour)",
+            action_taken="none",
+            action_result="skipped: rate limit exceeded",
+        )
+
     repo_full_name = get_target_repo()
     gh = get_client()
     repo = gh.get_repo(repo_full_name)
@@ -133,15 +151,17 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
     issue_tools = build_issue_tool_server(gh, repo_full_name, issue_number)
     skill = load_skill("issue-triage")
 
+    # Prefetch relevant memory — see the matching comment in agents/dependabot.py.
+    memory = get_memory_client()
+    memory_facts = await memory_search(f"issue: {issue.title}")
+    mcp_servers = {"github": issue_tools, "state": state_tools}
+    if memory is not None:
+        mcp_servers["memory"] = build_memory_tool_server(memory, default_limit=config.memory.search_top_k)
+
     options = ClaudeAgentOptions(
         system_prompt=skill,
-        mcp_servers={"github": issue_tools, "state": state_tools},
-        # See the matching comment in agents/dependabot.py: no built-in
-        # tools, no `allowed_tools` entries — every call to
-        # comment_on_issue/transition_issue_state falls through to
-        # `can_use_tool`, which is what actually enforces the kill switch
-        # and the tool-name allow-list, instead of being shadowed by a
-        # whole-tool `allowed_tools` entry.
+        mcp_servers=mcp_servers,
+        # See the matching comment in agents/dependabot.py.
         tools=[],
         allowed_tools=[],
         can_use_tool=can_use_tool,
@@ -156,7 +176,8 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
         f"Issue #{issue_number}: {issue.title!r}\n"
         f"Existing labels: {sorted(labels)}\n"
         f"Deterministic classification: {classification}\n"
-        f"Deterministic missing-field check (bug reports only): {missing or 'none'}\n\n"
+        f"Deterministic missing-field check (bug reports only): {missing or 'none'}\n"
+        f"Relevant memory (past runs on similar issues): {memory_facts or 'none found'}\n\n"
         f"Body:\n{issue.body or '(empty)'}\n\n"
         f"First, read the body. If this is clearly NOT actually a bug/feature report — it's a "
         f"usage question or documentation feedback that slipped past the template picker — post "
@@ -180,6 +201,21 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
     elif result.is_error:
         action_result = f"failed: {result.subtype}"
 
+    # Body excerpt included (not just the title) so anything a reporter
+    # actually names — a suspected package, a component, a version — is
+    # real, searchable content for a later memory_search() to surface, not
+    # just whatever's in the (often generic) issue title.
+    body_excerpt = (issue.body or "").strip().replace("\n", " ")[:400]
+    memory_refs = await memory_write(
+        name=f"{repo_full_name}:issue-{issue_number}",
+        episode_body=(
+            f"Issue #{issue_number} ({issue.title!r}): classified as {classification}, "
+            f"missing_fields={missing or 'none'}. Agent action result: {action_result}. "
+            f"Body excerpt: {body_excerpt!r}"
+        ),
+        source_description=WORKFLOW,
+    )
+
     entry = audit.write(
         trigger_event="issues",
         external_id=external_id,
@@ -193,14 +229,12 @@ async def handle_issue_event(issue_number: int, external_id: str) -> AuditEntry:
         revert_command="remove the ai/* label and delete the bot's comment",
         total_cost_usd=result.total_cost_usd if result else None,
         duration_ms=result.duration_ms if result else None,
+        memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
 
-    # Deterministic handoff to the Reproduction Agent (Dimension 2): only a
-    # complete bug report, never a security-labeled issue (that's
-    # security_agent.py's exclusive concern — see `.github/ai-maintainer.yaml`'s
-    # `issue_triage.exclusion_labels`, which already keeps security issues
-    # out of this function entirely, so the check below is a second,
-    # explicit guard rather than reliance on that alone).
+    # Deterministic handoff to the Reproduction Agent: only a complete bug
+    # report, never security-labeled (a second explicit guard — exclusion_labels
+    # already keeps security issues out of this function entirely).
     if classification == "bug" and not missing and "security" not in labels:
         await trigger_reproduction(issue_number, f"{external_id}-repro", parent_run_id=entry.id)
 

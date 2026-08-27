@@ -10,3 +10,10 @@ audit.sqlite3
 .pytest_cache/
 .DS_Store
 *.egg-info/
+
+# Generated doc-index/crawl artifacts (rebuild via scripts/crawl_docs.py +
+# scripts/build_doc_index.py) — data/kyverno_docs/ (curated seed corpus) is
+# the only data/ subdirectory that stays tracked.
+data/doc_index/
+data/doc_metadata.sqlite3
+data/_crawl_overflow/

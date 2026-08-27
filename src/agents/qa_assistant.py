@@ -23,6 +23,8 @@ never left to the model:
 
 from __future__ import annotations
 
+import json
+
 from claude_agent_sdk import (
     ClaudeAgentOptions,
     SandboxNetworkConfig,
@@ -33,10 +35,20 @@ from claude_agent_sdk import (
 )
 from loguru import logger
 
+from src.agents._shared import memory_search, memory_write
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
 from src.events import Event, register_handler
-from src.runtime import can_use_tool, get_audit_writer, get_config, get_github_token, get_repo_variable, single_turn_prompt
+from src.memory import build_memory_tool_server
+from src.runtime import (
+    can_use_tool,
+    get_audit_writer,
+    get_config,
+    get_github_token,
+    get_memory_client,
+    get_repo_variable,
+    single_turn_prompt,
+)
 from src.skills import load_skill
 from src.terminal import stream_agent_run
 from src.tools.discussion_tools import add_discussion_comment
@@ -193,13 +205,24 @@ async def answer_question(
     tool_server = _build_qa_tool_server(config, seen_urls, proposal)
     skill = load_skill("qa-assistant")
 
+    # Dimension 3 — see the matching comment in agents/dependabot.py.
+    # Everything written to shared memory comes from already-public GitHub
+    # activity (security_agent.py is the one deliberate exception — see its
+    # module docstring), so reading it here doesn't open a new leak path;
+    # it's just never a citable source (see the prompt below).
+    memory = get_memory_client()
+    memory_facts = await memory_search(question_text)
+    mcp_servers = {"qa": tool_server}
+    if memory is not None:
+        mcp_servers["memory"] = build_memory_tool_server(memory, default_limit=config.memory.search_top_k)
+
     options = ClaudeAgentOptions(
         system_prompt=skill,
-        mcp_servers={"qa": tool_server},
+        mcp_servers=mcp_servers,
         tools=[],
         allowed_tools=[],
         can_use_tool=can_use_tool,
-        max_turns=6,
+        max_turns=12,
         sandbox=SandboxSettings(
             enabled=True,
             # api.anthropic.com for the agent loop itself; api.voyageai.com
@@ -213,18 +236,36 @@ async def answer_question(
 
     prompt = (
         f"Question (via {source}): {question_text!r}\n\n"
+        f"Relevant memory (past questions/issues that might be related — background context "
+        f"only, never a citable source): {memory_facts or 'none found'}\n\n"
         f"Search before answering — call `search_docs` with one or more queries. If you find "
         f"something relevant, call `propose_answer` with a specific answer, the exact "
         f"source_url(s) you're citing, and an honest confidence level. If nothing relevant "
         f"turns up, or you're not genuinely confident, do NOT call `propose_answer` at all — "
         f"just explain in your final message why you couldn't answer. Never answer from "
-        f"general knowledge alone; only from what search_docs actually returned."
+        f"general knowledge alone; only from what search_docs actually returned — memory facts "
+        f"can help you judge relevance or spot a duplicate question, but citations must always "
+        f"be real search_docs source_urls, never a memory fact."
     )
 
-    result = await stream_agent_run(
-        query(prompt=single_turn_prompt(prompt), options=options),
-        title=f"Q&A Assistant — {source}",
-    )
+    try:
+        result = await stream_agent_run(
+            query(prompt=single_turn_prompt(prompt), options=options),
+            title=f"Q&A Assistant — {source}",
+        )
+    except Exception as e:
+        # The SDK raises (rather than returning an error ResultMessage) when
+        # it hits max_turns — confirmed live: the model had already called
+        # `propose_answer` with a fully-formed, correctly-cited answer, then
+        # made one more tool call that pushed it over the turn limit, and
+        # this exception discarded that answer entirely, crashing the whole
+        # run with nothing posted and nothing audited. `proposal` (populated
+        # by the tool closure, independent of `result`) survives this
+        # regardless — falling through to the same decide_post_or_escalate
+        # call below lets an already-good answer still get posted instead of
+        # thrown away over a turn-count technicality.
+        logger.warning(f"Q&A agent run raised ({e}); falling back to whatever `propose_answer` already captured")
+        result = None
 
     gate_decision, decision_reason = decide_post_or_escalate(proposal, config.qa_assistant.confidence_threshold)
 
@@ -244,6 +285,15 @@ async def answer_question(
     elif result.is_error:
         action_result = f"failed: {result.subtype}"
 
+    memory_refs = await memory_write(
+        name=f"qa:{source}:{external_id}",
+        episode_body=(
+            f"Q&A question (via {source}): {question_text!r}. Decision: {decision} "
+            f"({decision_reason}). Agent action result: {action_result}."
+        ),
+        source_description=WORKFLOW,
+    )
+
     return audit.write(
         trigger_event=source,
         external_id=external_id,
@@ -258,6 +308,7 @@ async def answer_question(
         parent_run_id=parent_run_id,
         total_cost_usd=result.total_cost_usd if result else None,
         duration_ms=result.duration_ms if result else None,
+        memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
 
 
@@ -273,6 +324,26 @@ async def handle_app_mention(event: Event) -> None:
         logger.warning("app_mention event missing channel/ts, skipping")
         return
     await answer_question(text, "slack", f"{channel}:{thread_ts}", event.external_id)
+
+
+@register_handler("discussion")
+async def handle_discussion_created(event: Event) -> None:
+    """Someone asking a question by opening a *new* Discussion (the natural
+    way most people actually use GitHub Discussions Q&A) — distinct from
+    `handle_discussion_comment` below, which answers a follow-up *reply* on
+    an existing discussion. Both funnel into the same `answer_question()`,
+    same `github_discussion` source/escalation path; this one was missing
+    entirely until it was noticed that a real `discussion.created` webhook
+    delivery had no registered handler at all and silently did nothing."""
+    if event.action != "created":
+        return
+    discussion = event.payload.get("discussion", {})
+    body = discussion.get("body", "")
+    node_id = discussion.get("node_id")
+    if not node_id or not body:
+        logger.warning("discussion event missing discussion node_id/body, skipping")
+        return
+    await answer_question(body, "github_discussion", node_id, event.external_id)
 
 
 @register_handler("discussion_comment")

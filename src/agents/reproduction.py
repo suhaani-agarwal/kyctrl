@@ -25,9 +25,12 @@ completed.
 
 from __future__ import annotations
 
+import json
+
 import yaml
 from loguru import logger
 
+from src.agents._shared import memory_write
 from src.agents.issue_reproduction_fields import extract_manifests_from_issue_body
 from src.audit import AuditEntry
 from src.config import kill_switch_engaged
@@ -91,6 +94,19 @@ async def trigger_reproduction(issue_number: int, external_id: str, parent_run_i
     }
     dispatched = dispatch_reproduction_workflow(gh, repo_full_name, config.reproduction_agent.workflow_file, inputs)
 
+    # Dimension 3 — no SDK/prompt in this module (see its docstring), so
+    # this is write-only: no prefetch, no search_memory tool to offer.
+    memory_refs = await memory_write(
+        name=f"{repo_full_name}:issue-{issue_number}-repro-dispatch",
+        episode_body=(
+            f"Reproduction Agent dispatched for issue #{issue_number}: "
+            f"{len(manifests.policy_manifests)} policy manifest(s), "
+            f"{len(manifests.resource_manifests)} resource manifest(s) extracted. "
+            f"Dispatch {'succeeded' if dispatched else 'failed'}."
+        ),
+        source_description=WORKFLOW,
+    )
+
     return audit.write(
         trigger_event="issues",
         external_id=external_id,
@@ -105,6 +121,7 @@ async def trigger_reproduction(issue_number: int, external_id: str, parent_run_i
         can_be_reverted=False,
         revert_command="N/A — read-only reproduction run, nothing to revert",
         parent_run_id=parent_run_id,
+        memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
 
 
@@ -122,6 +139,18 @@ async def handle_workflow_run(event: Event) -> None:
     audit = get_audit_writer()
     conclusion = wr.get("conclusion", "unknown")
     logger.info(f"Reproduction workflow run {wr.get('id')} completed: {conclusion}")
+
+    # Dimension 3 — the actual pass/fail result, independently worth
+    # remembering from the dispatch decision above (see this module's
+    # docstring on why dispatch->run correlation isn't precise yet — this
+    # episode is scoped to the run id, not a specific issue number, for the
+    # same reason).
+    memory_refs = await memory_write(
+        name=f"{get_target_repo()}:repro-run-{wr.get('id')}",
+        episode_body=f"Reproduction workflow run {wr.get('id')} completed with conclusion={conclusion}.",
+        source_description=WORKFLOW,
+    )
+
     audit.write(
         trigger_event="workflow_run",
         external_id=event.external_id,
@@ -131,4 +160,5 @@ async def handle_workflow_run(event: Event) -> None:
         action_taken="none (workflow posted its own findings via gh issue comment)",
         action_result="success" if conclusion == "success" else f"failed: {conclusion}",
         can_be_reverted=False,
+        memory_refs=json.dumps(memory_refs) if memory_refs else None,
     )
